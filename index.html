@@ -43,370 +43,77 @@
 <body>
 <h2>📅 日置川旅遊互動行程表</h2>
 <div id="weather-box">正在查詢即時天氣資料...</div>
+<div id="weather-extra" style="margin-top:1em;">
+<h3>🌦️ 地區即時天氣</h3>
+<ul style="font-size: 14px; line-height: 1.6;">
+<li>📍 田邊市：<span id="weather-tanabe">讀取中...</span></li>
+<li>♨️ 龍神温泉：<span id="weather-ryujin">讀取中...</span></li>
+<li>🏖️ 白浜温泉：<span id="weather-shirahama">讀取中...</span></li>
+</ul>
+</div>
+<script>
+      async function fetchWeather(name, lat, lon, elementId) {
+        try {
+          const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,precipitation,weathercode&timezone=Asia%2FTokyo`;
+          const res = await fetch(url);
+          const data = await res.json();
+          const t = data.current.temperature_2m;
+          const r = data.current.precipitation;
+          const w = data.current.weathercode;
+          const map = {0:"☀️ 晴",1:"🌤️",2:"⛅",3:"☁️",45:"🌫️",51:"🌦️",61:"🌧️",95:"⛈️"};
+          document.getElementById(elementId).innerText = `${map[w]||'☁️'} ${t}°C，降水 ${r}mm/h`;
+        } catch {
+          document.getElementById(elementId).innerText = "⚠️ 無法取得資料";
+        }
+      }
+      fetchWeather("田邊市", 33.723, 135.379, "weather-tanabe");
+      fetchWeather("龍神温泉", 33.905, 135.584, "weather-ryujin");
+      fetchWeather("白浜温泉", 33.681, 135.345, "weather-shirahama");
+    </script>
 <div id="date-nav"><h3>📅 快速跳轉到每日行程</h3><a href="#date_0911" style="margin-right:1em;">📅 9/11 (四)　☀️</a><a href="#date_0912" style="margin-right:1em;">📅 9/12 (五)　⛅</a><a href="#date_0913" style="margin-right:1em;">📅 9/13 (六)　🌤️</a><a href="#date_0914" style="margin-right:1em;">📅 9/14 (日)　🌦️</a><a href="#date_0915" style="margin-right:1em;">📅 9/15 (一)　☀️</a><a href="#date_0916" style="margin-right:1em;">📅 9/16 (二)　⛅</a></div><table class="display responsive nowrap" id="itinerary">
 <thead>
-<tr style="text-align: right;">
-<th>日期</th>
-<th>時間區段</th>
-<th>車程</th>
-<th>活動地點 / 行程內容</th>
-<th>地址</th>
-<th>電話</th>
-<th>Google地圖連結</th>
-</tr>
+<tr style="text-align: right;"><th>日期</th><th>時間區段</th><th>車程</th><th>活動地點 / 行程內容</th><th>電話</th><th>Google地圖連結</th><th>地址</th></tr>
 </thead>
 <tbody>
-<tr id="date_0911">
-<td>📅 9/11 (四)　☀️</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>9/11 (四)</td>
-<td>12:00</td>
-<td></td>
-<td>📍 關西機場出關</td>
-<td></td>
-<td></td>
-<td><a href="https://www.google.com/maps/search/?api=1&amp;query=關西機場出關" target="_blank">📍 點我開啟地圖</a></td>
-</tr>
-<tr>
-<td>9/11 (四)</td>
-<td>13:30</td>
-<td>🚗</td>
-<td>📍 租車出發</td>
-<td></td>
-<td></td>
-<td><a href="https://www.google.com/maps/search/?api=1&amp;query=租車出發" target="_blank">📍 點我開啟地圖</a></td>
-</tr>
-<tr>
-<td>9/11 (四)</td>
-<td>13:30~14:50</td>
-<td>🚗</td>
-<td>📍 元嶋神社 鳥居（80分鐘）</td>
-<td>和歌山県田辺市目良20（天神崎元島第二駐車場）</td>
-<td>0739-26-9929</td>
-<td><a href="https://www.google.com/maps/search/?api=1&amp;query=元嶋神社+鳥居+和歌山県田辺市目良20（天神崎元島第二駐車場）" target="_blank">📍 點我開啟地圖</a></td>
-</tr>
-<tr>
-<td>9/11 (四)</td>
-<td>14:50~15:20</td>
-<td></td>
-<td>📍 元嶋神社 鳥居（30分鐘）</td>
-<td>和歌山県田辺市目良20（天神崎元島第二駐車場）</td>
-<td>0739-26-9929</td>
-<td></td>
-</tr>
-<tr>
-<td>9/11 (四)</td>
-<td>15:20~15:30</td>
-<td>🚗</td>
-<td>🎣 釣具店 - BAYマルチョウ（10分鐘）</td>
-<td>230-3 Inaricho, Tanabe, Wakayama 646-0051日本</td>
-<td></td>
-<td><a href="https://www.google.com/maps/search/?api=1&amp;query=釣具店+-+BAYマルチョウ" target="_blank">📍 點我開啟地圖</a></td>
-</tr>
-<tr>
-<td>9/11 (四)</td>
-<td>15:30~16:00</td>
-<td></td>
-<td>🎣 釣具店 - BAYマルチョウ（30分鐘）</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>9/11 (四)</td>
-<td>16:00~16:10</td>
-<td>🚗</td>
-<td>📍 鬪雞神社（10分鐘）</td>
-<td>1-1 Toyo, Tanabe, Wakayama 646-0029日本</td>
-<td></td>
-<td><a href="https://www.google.com/maps/search/?api=1&amp;query=鬪雞神社" target="_blank">📍 點我開啟地圖</a></td>
-</tr>
-<tr>
-<td>9/11 (四)</td>
-<td>16:10~16:40</td>
-<td></td>
-<td>📍 鬪雞神社（30分鐘）</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>9/11 (四)</td>
-<td>16:40~16:50</td>
-<td>🚗</td>
-<td>🎣 釣具店 - ナニワ（10分鐘）</td>
-<td></td>
-<td></td>
-<td><a href="https://www.google.com/maps/search/?api=1&amp;query=釣具店+-+ナニワ" target="_blank">📍 點我開啟地圖</a></td>
-</tr>
-<tr>
-<td>9/11 (四)</td>
-<td>16:50~17:20</td>
-<td></td>
-<td>🎣 釣具店 - ナニワ（30分鐘）</td>
-<td>2 Chome-35-25 Takao, Tanabe, Wakayama 646-0028日本</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>9/11 (四)</td>
-<td>17:20~17:35</td>
-<td>🚗</td>
-<td>🛒 超市 - オークワ（15分鐘）</td>
-<td></td>
-<td></td>
-<td><a href="https://www.google.com/maps/search/?api=1&amp;query=超市+-+オークワ" target="_blank">📍 點我開啟地圖</a></td>
-</tr>
-<tr>
-<td>9/11 (四)</td>
-<td>17:35~18:00</td>
-<td></td>
-<td>🛒 超市 - オークワ（25分鐘）</td>
-<td>95-1 Koya, Wakayama, 640-8435日本</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>9/11 (四)</td>
-<td>18:00~18:10</td>
-<td>🚗</td>
-<td>🛒 超市 - エバグリーン（10分鐘）</td>
-<td></td>
-<td></td>
-<td><a href="https://www.google.com/maps/search/?api=1&amp;query=超市+-+エバグリーン" target="_blank">📍 點我開啟地圖</a></td>
-</tr>
-<tr>
-<td>9/11 (四)</td>
-<td>18:10~18:40</td>
-<td></td>
-<td>🛒 超市 - エバグリーン（30分鐘）</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>9/11 (四)</td>
-<td>18:40~19:00</td>
-<td></td>
-<td>🏠 森のお宿（20分鐘）</td>
-<td></td>
-<td></td>
-<td><a href="https://www.google.com/maps/search/?api=1&amp;query=森のお宿" target="_blank">📍 點我開啟地圖</a></td>
-</tr>
-<tr id="date_0912">
-<td>📅 9/12 (五)　⛅</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>9/12 (五)</td>
-<td>整天</td>
-<td></td>
-<td>📍 日置川鮎釣</td>
-<td></td>
-<td></td>
-<td><a href="https://www.google.com/maps/search/?api=1&amp;query=日置川鮎釣" target="_blank">📍 點我開啟地圖</a></td>
-</tr>
-<tr>
-<td>9/12 (五)</td>
-<td>16:30~17:30</td>
-<td></td>
-<td>♨️ えびね温泉（60分鐘）</td>
-<td>和歌山県西牟婁郡白浜町向平504</td>
-<td>0739-53-0366</td>
-<td><a href="https://www.google.com/maps/search/?api=1&amp;query=えびね温泉+和歌山県西牟婁郡白浜町向平504" target="_blank">📍 點我開啟地圖</a></td>
-</tr>
-<tr id="date_0913">
-<td>📅 9/13 (六)　🌤️</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>9/13 (六)</td>
-<td>08:00~09:25</td>
-<td>🚗</td>
-<td>📍 伊藤荘喫茶あゆ（オトリ）（85分鐘）</td>
-<td></td>
-<td></td>
-<td><a href="https://www.google.com/maps/search/?api=1&amp;query=伊藤荘喫茶あゆ（オトリ）" target="_blank">📍 點我開啟地圖</a></td>
-</tr>
-<tr>
-<td>9/13 (六)</td>
-<td>09:30~15:00</td>
-<td></td>
-<td>📍 釣魚 + 山野正博（オトリ）</td>
-<td></td>
-<td></td>
-<td><a href="https://www.google.com/maps/search/?api=1&amp;query=釣魚+++山野正博（オトリ）" target="_blank">📍 點我開啟地圖</a></td>
-</tr>
-<tr>
-<td>9/13 (六)</td>
-<td>15:00~16:00</td>
-<td>🚗</td>
-<td>♨️ 龍神温泉元湯（60分鐘）</td>
-<td>和歌山県田辺市龍神村龍神37</td>
-<td>0739-79-0726</td>
-<td><a href="https://www.google.com/maps/search/?api=1&amp;query=龍神温泉元湯+和歌山県田辺市龍神村龍神37" target="_blank">📍 點我開啟地圖</a></td>
-</tr>
-<tr>
-<td>9/13 (六)</td>
-<td>16:00~17:00</td>
-<td></td>
-<td>♨️ 龍神温泉元湯（60分鐘）</td>
-<td>和歌山県田辺市龍神村龍神37</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>9/13 (六)</td>
-<td>17:10~18:30</td>
-<td>🚗</td>
-<td>🏠 森のお宿（80分鐘）</td>
-<td>和歌山県西牟婁郡白浜町大880-2</td>
-<td>0739-54-0345</td>
-<td></td>
-</tr>
-<tr id="date_0914">
-<td>📅 9/14 (日)　🌦️</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>9/14 (日)</td>
-<td>整天</td>
-<td></td>
-<td>📍 日置川鮎釣</td>
-<td></td>
-<td></td>
-<td><a href="https://www.google.com/maps/search/?api=1&amp;query=三段壁・三段壁洞窟+和歌山県西牟婁郡白浜町2927-52" target="_blank">📍 點我開啟地圖</a></td>
-</tr>
-<tr>
-<td>9/14 (日)</td>
-<td>晚餐後</td>
-<td></td>
-<td>🛒 超市 - エバグリーン</td>
-<td></td>
-<td></td>
-<td><a href="https://www.google.com/maps/search/?api=1&amp;query=超市+-+エバグリーン" target="_blank">📍 點我開啟地圖</a></td>
-</tr>
-<tr id="date_0915">
-<td>📅 9/15 (一)　☀️</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>9/15 (一)</td>
-<td>整天</td>
-<td></td>
-<td>📍 日置川鮎釣</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr id="date_0916">
-<td>📅 9/16 (二)　⛅</td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>9/16 (二)</td>
-<td>09:00</td>
-<td></td>
-<td>🏠 森のお宿 退房</td>
-<td>和歌山県西牟婁郡白浜町大880-2</td>
-<td>0739-54-0345</td>
-<td><a href="https://www.google.com/maps/search/?api=1&amp;query=森のお宿+退房" target="_blank">📍 點我開啟地圖</a></td>
-</tr>
-<tr>
-<td>9/16 (二)</td>
-<td>09:00~09:30</td>
-<td>🚗</td>
-<td>🏞️ 三段壁・三段壁洞窟（30分鐘）</td>
-<td>和歌山県西牟婁郡白浜町2927-52</td>
-<td>0739-42-4495</td>
-<td><a href="https://www.google.com/maps/search/?api=1&amp;query=三段壁・三段壁洞窟+和歌山県西牟婁郡白浜町2927-52" target="_blank">📍 點我開啟地圖</a></td>
-</tr>
-<tr>
-<td>9/16 (二)</td>
-<td>09:30~11:30</td>
-<td></td>
-<td>🏞️ 三段壁・三段壁洞窟（120分鐘）</td>
-<td>和歌山県西牟婁郡白浜町2927-52</td>
-<td>0739-42-4495</td>
-<td></td>
-</tr>
-<tr>
-<td>9/16 (二)</td>
-<td>11:30~11:45</td>
-<td>🚗</td>
-<td>📍 とれとれ魚市場（15分鐘）</td>
-<td>和歌山県西牟婁郡白浜町堅田2521</td>
-<td>0739-42-1010</td>
-<td><a href="https://www.google.com/maps/search/?api=1&amp;query=とれとれ魚市場+和歌山県西牟婁郡白浜町堅田2521" target="_blank">📍 點我開啟地圖</a></td>
-</tr>
-<tr>
-<td>9/16 (二)</td>
-<td>11:45~13:30</td>
-<td></td>
-<td>📍 とれとれ魚市場（105分鐘）</td>
-<td>和歌山県西牟婁郡白浜町堅田2521</td>
-<td>0739-42-1010</td>
-<td></td>
-</tr>
-<tr>
-<td>9/16 (二)</td>
-<td>13:30~13:45</td>
-<td>🚗</td>
-<td>♨️ 白浜温泉（15分鐘）</td>
-<td>和歌山県西牟婁郡白浜町1668</td>
-<td>0739-42-3016</td>
-<td><a href="https://www.google.com/maps/search/?api=1&amp;query=白浜温泉+和歌山県西牟婁郡白浜町1668" target="_blank">📍 點我開啟地圖</a></td>
-</tr>
-<tr>
-<td>9/16 (二)</td>
-<td>13:45~14:45</td>
-<td></td>
-<td>♨️ 白浜温泉（60分鐘）</td>
-<td>和歌山県西牟婁郡白浜町1668</td>
-<td>0739-42-3016</td>
-<td></td>
-</tr>
-<tr>
-<td>9/16 (二)</td>
-<td>14:45~17:00</td>
-<td>🚗</td>
-<td>📍 關西機場（135分鐘）</td>
-<td></td>
-<td></td>
-<td><a href="https://www.google.com/maps/search/?api=1&amp;query=關西機場" target="_blank">📍 點我開啟地圖</a></td>
-</tr>
+<tr id="date_0911"><td>📅 9/11 (四)　☀️</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>9/11 (四)</td><td>12:00</td><td></td><td>📍 關西機場出關</td><td></td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=關西機場出關" target="_blank">📍 點我開啟地圖</a></td><td></td></tr>
+<tr><td>9/11 (四)</td><td>13:30</td><td>🚗</td><td>📍 租車出發</td><td></td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=租車出發" target="_blank">📍 點我開啟地圖</a></td><td></td></tr>
+<tr><td>9/11 (四)</td><td>13:30~14:50</td><td>🚗</td><td>📍 元嶋神社 鳥居（80分鐘）</td><td>0739-26-9929</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=元嶋神社+鳥居+和歌山県田辺市目良20（天神崎元島第二駐車場）" target="_blank">📍 點我開啟地圖</a></td><td>22-41 Mera, Tanabe, Wakayama 646-0058 日本</td></tr>
+<tr><td>9/11 (四)</td><td>14:50~15:20</td><td></td><td>📍 元嶋神社 鳥居（30分鐘）</td><td>0739-26-9929</td><td></td><td></td></tr>
+<tr><td>9/11 (四)</td><td>15:20~15:30</td><td>🚗</td><td>🎣 釣具店 - BAYマルチョウ（10分鐘）</td><td></td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=釣具店+-+BAYマルチョウ" target="_blank">📍 點我開啟地圖</a></td><td>230-3 Inaricho, Tanabe, Wakayama 646-0051日本</td></tr>
+<tr><td>9/11 (四)</td><td>15:30~16:00</td><td></td><td>🎣 釣具店 - BAYマルチョウ（30分鐘）</td><td></td><td></td><td></td></tr>
+<tr><td>9/11 (四)</td><td>16:00~16:10</td><td>🚗</td><td>📍 鬪雞神社（10分鐘）</td><td></td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=鬪雞神社" target="_blank">📍 點我開啟地圖</a></td><td>1-1 Toyo, Tanabe, Wakayama 646-0029日本</td></tr>
+<tr><td>9/11 (四)</td><td>16:10~16:40</td><td></td><td>📍 鬪雞神社（30分鐘）</td><td></td><td></td><td></td></tr>
+<tr><td>9/11 (四)</td><td>16:40~16:50</td><td>🚗</td><td>🎣 釣具店 - ナニワ（10分鐘）</td><td></td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=釣具店+-+ナニワ" target="_blank">📍 點我開啟地圖</a></td><td></td></tr>
+<tr><td>9/11 (四)</td><td>16:50~17:20</td><td></td><td>🎣 釣具店 - ナニワ（30分鐘）</td><td></td><td></td><td>2 Chome-35-25 Takao, Tanabe, Wakayama 646-0028日本</td></tr>
+<tr><td>9/11 (四)</td><td>17:20~17:35</td><td>🚗</td><td>🛒 超市 - オークワ（15分鐘）</td><td></td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=超市+-+オークワ" target="_blank">📍 點我開啟地圖</a></td><td></td></tr>
+<tr><td>9/11 (四)</td><td>17:35~18:00</td><td></td><td>🛒 超市 - オークワ（25分鐘）</td><td></td><td></td><td>95-1 Koya, Wakayama, 640-8435日本</td></tr>
+<tr><td>9/11 (四)</td><td>18:00~18:10</td><td>🚗</td><td>🛒 超市 - エバグリーン（10分鐘）</td><td></td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=超市+-+エバグリーン" target="_blank">📍 點我開啟地圖</a></td><td></td></tr>
+<tr><td>9/11 (四)</td><td>18:10~18:40</td><td></td><td>🛒 超市 - エバグリーン（30分鐘）</td><td></td><td></td><td></td></tr>
+<tr><td>9/11 (四)</td><td>18:40~19:00</td><td></td><td>🏠 森のお宿（20分鐘）</td><td></td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=森のお宿" target="_blank">📍 點我開啟地圖</a></td><td></td></tr>
+<tr id="date_0912"><td>📅 9/12 (五)　⛅</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>9/12 (五)</td><td>整天</td><td></td><td>📍 日置川鮎釣</td><td></td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=日置川鮎釣" target="_blank">📍 點我開啟地圖</a></td><td></td></tr>
+<tr><td>9/12 (五)</td><td>16:30~17:30</td><td></td><td>♨️ えびね温泉（60分鐘）</td><td>0739-53-0366</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=えびね温泉+和歌山県西牟婁郡白浜町向平504" target="_blank">📍 點我開啟地圖</a></td><td>和歌山県西牟婁郡白浜町向平504</td></tr>
+<tr id="date_0913"><td>📅 9/13 (六)　🌤️</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>9/13 (六)</td><td>08:00~09:25</td><td>🚗</td><td>和歌山県日高川 伊藤荘（オトリ店）</td><td>0738-57-0624</td><td><a href="https://www.google.com/maps?q=29+Kumanogawa,+Hidakagawa,+Hidaka+District,+Wakayama+644-1242,+Japan" target="_blank">📍 點我開啟地圖</a></td><td>〒644-1242 和歌山県日高郡日高川町熊野川29</td></tr>
+<tr><td>9/13 (六)</td><td>09:30~15:00</td><td></td><td>📍 釣魚 + 山野正博（オトリ）</td><td></td><td><a href="https://www.google.com/maps?q=21+Harabiura,+Hidakagawa,+Hidaka+District,+Wakayama+644-1133,+Japan" target="_blank">📍 點我開啟地圖</a></td><td>21 Harabiura, Hidakagawa, Hidaka District, Wakayama 644-1133, Japan</td></tr>
+<tr><td>9/13 (六)</td><td>15:00~16:00</td><td>🚗</td><td>♨️ 龍神温泉元湯（60分鐘）</td><td>0739-79-0726</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=龍神温泉元湯+和歌山県田辺市龍神村龍神37" target="_blank">📍 點我開啟地圖</a></td><td></td></tr>
+<tr><td>9/13 (六)</td><td>16:00~17:00</td><td></td><td>♨️ 龍神温泉元湯（60分鐘）</td><td></td><td></td><td>和歌山県田辺市龍神村龍神37</td></tr>
+<tr><td>9/13 (六)</td><td>17:10~18:30</td><td>🚗</td><td>🏠 森のお宿（80分鐘）</td><td>0739-54-0345</td><td></td><td>和歌山県西牟婁郡白浜町大880-2</td></tr>
+<tr id="date_0914"><td>📅 9/14 (日)　🌦️</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>9/14 (日)</td><td>整天</td><td></td><td>📍 日置川鮎釣</td><td></td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=三段壁・三段壁洞窟+和歌山県西牟婁郡白浜町2927-52" target="_blank">📍 點我開啟地圖</a></td><td></td></tr>
+<tr><td>9/14 (日)</td><td>晚餐後</td><td></td><td>🛒 超市 - エバグリーン</td><td></td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=超市+-+エバグリーン" target="_blank">📍 點我開啟地圖</a></td><td></td></tr>
+<tr id="date_0915"><td>📅 9/15 (一)　☀️</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>9/15 (一)</td><td>整天</td><td></td><td>📍 日置川鮎釣</td><td></td><td></td><td></td></tr>
+<tr id="date_0916"><td>📅 9/16 (二)　⛅</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>9/16 (二)</td><td>09:00</td><td></td><td>🏠 森のお宿 退房</td><td>0739-54-0345</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=森のお宿+退房" target="_blank">📍 點我開啟地圖</a></td><td>和歌山県西牟婁郡白浜町大880-2</td></tr>
+<tr><td>9/16 (二)</td><td>09:00~09:30</td><td>🚗</td><td>🏞️ 三段壁・三段壁洞窟（30分鐘）</td><td>0739-42-4495</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=三段壁・三段壁洞窟+和歌山県西牟婁郡白浜町2927-52" target="_blank">📍 點我開啟地圖</a></td><td></td></tr>
+<tr><td>9/16 (二)</td><td>09:30~11:30</td><td></td><td>🏞️ 三段壁・三段壁洞窟（120分鐘）</td><td>0739-42-4495</td><td></td><td>和歌山県西牟婁郡白浜町2927-52</td></tr>
+<tr><td>9/16 (二)</td><td>11:30~11:45</td><td>🚗</td><td>📍 とれとれ魚市場（15分鐘）</td><td>0739-42-1010</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=とれとれ魚市場+和歌山県西牟婁郡白浜町堅田2521" target="_blank">📍 點我開啟地圖</a></td><td></td></tr>
+<tr><td>9/16 (二)</td><td>11:45~13:30</td><td></td><td>📍 とれとれ魚市場（105分鐘）</td><td>0739-42-1010</td><td></td><td>和歌山県西牟婁郡白浜町堅田2521</td></tr>
+<tr><td>9/16 (二)</td><td>13:30~13:45</td><td>🚗</td><td>♨️ 白浜温泉（15分鐘）</td><td>0739-42-3016</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=白浜温泉+和歌山県西牟婁郡白浜町1668" target="_blank">📍 點我開啟地圖</a></td><td></td></tr>
+<tr><td>9/16 (二)</td><td>13:45~14:45</td><td></td><td>♨️ 白浜温泉（60分鐘）</td><td>0739-42-3016</td><td></td><td>和歌山県西牟婁郡白浜町1668</td></tr>
+<tr><td>9/16 (二)</td><td>14:45~17:00</td><td>🚗</td><td>📍 關西機場（135分鐘）</td><td></td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=關西機場" target="_blank">📍 點我開啟地圖</a></td><td></td></tr>
 </tbody>
 </table>
 <script>
