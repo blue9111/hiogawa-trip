@@ -146,7 +146,7 @@
           }
         }
 
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,precipitation,weathercode&timezone=Asia%2FTokyo`;
+        const url = `https://corsproxy.io/?https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,precipitation,weathercode&timezone=Asia%2FTokyo`;
         const res = await fetch(url);
         const data = await res.json();
         const t = data.current.temperature_2m;
