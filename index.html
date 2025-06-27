@@ -43,6 +43,41 @@
 <body>
 <h2>📅 日置川旅遊互動行程表</h2>
 <div id="weather-box">正在查詢即時天氣資料...</div>
+<div id="animated-weather" style="margin-top:1em;">
+<h3>⛅ 即時天氣動畫</h3>
+<div style="font-size: 16px;">
+<span id="weather-icon" style="font-size: 48px;">⏳</span>
+<span id="weather-desc" style="margin-left: 10px;">載入中...</span>
+</div>
+</div>
+<script>
+      async function updateWeatherAnimation() {
+        try {
+          const url = "https://api.open-meteo.com/v1/forecast?latitude=33.723&longitude=135.379&current=temperature_2m,weathercode&timezone=Asia%2FTokyo";
+          const res = await fetch(url);
+          const data = await res.json();
+          const code = data.current.weathercode;
+          const temp = data.current.temperature_2m;
+          const map = {
+            0: ["☀️", "晴朗"],
+            1: ["🌤️", "晴時多雲"],
+            2: ["⛅", "局部多雲"],
+            3: ["☁️", "陰天"],
+            45: ["🌫️", "有霧"],
+            51: ["🌦️", "間歇性小雨"],
+            61: ["🌧️", "小雨"],
+            95: ["⛈️", "雷雨"]
+          };
+          const weather = map[code] || ["❓", "未知天氣"];
+          document.getElementById("weather-icon").innerText = weather[0];
+          document.getElementById("weather-desc").innerText = `${weather[1]}・${temp}°C`;
+        } catch {
+          document.getElementById("weather-icon").innerText = "⚠️";
+          document.getElementById("weather-desc").innerText = "無法取得天氣資料";
+        }
+      }
+      updateWeatherAnimation();
+    </script>
 <div id="weather-extra" style="margin-top:1em;">
 <h3>🌦️ 地區即時天氣</h3>
 <ul style="font-size: 14px; line-height: 1.6;">
@@ -92,7 +127,7 @@
 <tr><td>9/11 (四)</td><td>18:10~18:40</td><td></td><td>🛒 超市 - エバグリーン（30分鐘）</td><td></td><td></td><td>564-1 Ikuma, 上富田町 Kamitonda, Nishimuro District, Wakayama 649-2103 日本</td></tr>
 <tr><td>9/11 (四)</td><td>18:40~19:00</td><td></td><td>🏠 森のお宿（20分鐘）</td><td></td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=森のお宿" target="_blank">📍 點我開啟地圖</a></td><td></td></tr>
 <tr id="date_0912"><td>📅 9/12 (五)　⛅</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td>9/12 (五)</td><td>整天</td><td></td><td>📍 日置川鮎釣</td><td></td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=日置川鮎釣" target="_blank">📍 點我開啟地圖</a></td><td></td></tr>
+<tr><td>9/12 (五)</td><td>整天</td><td></td><td>📍 日置川鮎釣</td><td></td><td><a href="https://www.google.com/maps?q=33.674167,135.544028" target="_blank">📍 點我開啟地圖</a></td><td></td></tr>
 <tr><td>9/12 (五)</td><td>16:30~17:30</td><td></td><td>♨️ えびね温泉（60分鐘）</td><td>0739-53-0366</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=えびね温泉+和歌山県西牟婁郡白浜町向平504" target="_blank">📍 點我開啟地圖</a></td><td>和歌山県西牟婁郡白浜町向平504</td></tr>
 <tr id="date_0913"><td>📅 9/13 (六)　🌤️</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
 <tr><td>9/13 (六)</td><td>08:00~09:25</td><td>🚗</td><td>和歌山県日高川 伊藤荘（オトリ店）</td><td>0738-57-0624</td><td><a href="https://www.google.com/maps?q=29+Kumanogawa,+Hidakagawa,+Hidaka+District,+Wakayama+644-1242,+Japan" target="_blank">📍 點我開啟地圖</a></td><td>〒644-1242 和歌山県日高郡日高川町熊野川29</td></tr>
@@ -101,17 +136,17 @@
 <tr><td>9/13 (六)</td><td>16:00~17:00</td><td></td><td>♨️ 龍神温泉元湯（60分鐘） ※[約 173NTD] [自備毛巾]</td><td></td><td></td><td>和歌山県田辺市龍神村龍神37</td></tr>
 <tr><td>9/13 (六)</td><td>17:10~18:30</td><td>🚗</td><td>🏠 森のお宿（80分鐘）</td><td>0739-54-0345</td><td></td><td>和歌山県西牟婁郡白浜町大880-2</td></tr>
 <tr id="date_0914"><td>📅 9/14 (日)　🌦️</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td>9/14 (日)</td><td>整天</td><td></td><td>📍 日置川鮎釣</td><td></td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=三段壁・三段壁洞窟+和歌山県西牟婁郡白浜町2927-52" target="_blank">📍 點我開啟地圖</a></td><td></td></tr>
-<tr><td>9/14 (日)</td><td>晚餐後</td><td></td><td>🛒 超市 - エバグリーン</td><td></td><td></td><td>564-1 Ikuma, 上富田町 Kamitonda, Nishimuro District, Wakayama 649-2103 日本</td></tr>
+<tr><td>9/14 (日)</td><td>整天</td><td></td><td>📍 日置川鮎釣</td><td></td><td><a href="https://www.google.com/maps?q=33.674167,135.544028" target="_blank">📍 點我開啟地圖</a></td><td></td></tr>
+<tr><td>9/14 (日)</td><td>晚餐後</td><td></td><td>🛒 超市 - エバグリーン</td><td></td><td><a href="https://www.google.com/maps?q=564-1+Ikuma,+Kamitonda,+Wakayama+649-2103+日本" target="_blank">📍 點我開啟地圖</a></td><td>564-1 Ikuma, 上富田町 Kamitonda, Nishimuro District, Wakayama 649-2103 日本</td></tr>
 <tr id="date_0915"><td>📅 9/15 (一)　☀️</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td>9/15 (一)</td><td>整天</td><td></td><td>📍 日置川鮎釣</td><td></td><td></td><td></td></tr>
+<tr><td>9/15 (一)</td><td>整天</td><td></td><td>📍 日置川鮎釣</td><td></td><td><a href="https://www.google.com/maps?q=33.674167,135.544028" target="_blank">📍 點我開啟地圖</a></td><td></td></tr>
 <tr id="date_0916"><td>📅 9/16 (二)　⛅</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
 <tr><td>9/16 (二)</td><td>09:00</td><td></td><td>🏠 森のお宿 退房</td><td></td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=森のお宿+退房" target="_blank">📍 點我開啟地圖</a></td><td>和歌山県西牟婁郡白浜町大880-2</td></tr>
-<tr><td>9/16 (二)</td><td>09:00~09:30</td><td>🚗</td><td>🏞️ 三段壁・三段壁洞窟（30分鐘）</td><td>0739-42-4495</td><td></td><td>和歌山県西牟婁郡白浜町2927-52</td></tr>
-<tr><td>9/16 (二)</td><td>09:30~11:30</td><td></td><td>🏞️ 三段壁・三段壁洞窟（120分鐘）</td><td></td><td></td><td>和歌山県西牟婁郡白浜町2927-52</td></tr>
-<tr><td>9/16 (二)</td><td>11:30~11:45</td><td>🚗</td><td>📍 とれとれ魚市場（15分鐘）</td><td>0739-42-1010</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=とれとれ魚市場+和歌山県西牟婁郡白浜町堅田2521" target="_blank">📍 點我開啟地圖</a></td><td>和歌山県西牟婁郡白浜町堅田2521</td></tr>
+<tr><td>9/16 (二)</td><td>09:00~09:30</td><td>🚗</td><td>🏞️ 三段壁・三段壁洞窟（30分鐘）</td><td>0739-42-4495</td><td><a href="https://www.google.com/maps?q=2927-52,+Shirahama,+Nishimuro+District,+Wakayama+649-2211,+日本" target="_blank">📍 點我開啟地圖</a></td><td>和歌山県西牟婁郡白浜町2927-52</td></tr>
+<tr><td>9/16 (二)</td><td>09:30~11:30</td><td></td><td>🏞️ 三段壁・三段壁洞窟（120分鐘）</td><td></td><td><a href="https://www.google.com/maps?q=2927-52,+Shirahama,+Nishimuro+District,+Wakayama+649-2211,+日本" target="_blank">📍 點我開啟地圖</a></td><td>和歌山県西牟婁郡白浜町2927-52</td></tr>
+<tr><td>9/16 (二)</td><td>11:30~11:45</td><td>🚗</td><td>📍 とれとれ魚市場（15分鐘）</td><td></td><td></td><td>和歌山県西牟婁郡白浜町堅田2521</td></tr>
 <tr><td>9/16 (二)</td><td>11:45~13:30</td><td></td><td>📍 とれとれ魚市場（105分鐘）</td><td></td><td></td><td>和歌山県西牟婁郡白浜町堅田2521</td></tr>
-<tr><td>9/16 (二)</td><td>13:30~13:45</td><td>🚗</td><td>♨️ 白浜温泉（15分鐘）</td><td>0739-42-3016</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=白浜温泉+和歌山県西牟婁郡白浜町1668" target="_blank">📍 點我開啟地圖</a></td><td>和歌山県西牟婁郡白浜町1668</td></tr>
+<tr><td>9/16 (二)</td><td>13:30~13:45</td><td>🚗</td><td>♨️ 白浜温泉（15分鐘）</td><td>0739-42-3016</td><td><a href="https://www.google.com/maps?q=和歌山県西牟婁郡白浜町１６６８" target="_blank">📍 點我開啟地圖</a></td><td>和歌山県西牟婁郡白浜町1668</td></tr>
 <tr><td>9/16 (二)</td><td>13:45~14:45</td><td></td><td>♨️ 白浜温泉（60分鐘）</td><td></td><td></td><td>和歌山県西牟婁郡白浜町1668</td></tr>
 <tr><td>9/16 (二)</td><td>14:45~17:00</td><td>🚗</td><td>📍 關西機場（135分鐘）</td><td></td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=關西機場" target="_blank">📍 點我開啟地圖</a></td><td></td></tr>
 </tbody>
