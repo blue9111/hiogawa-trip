@@ -1,238 +1,245 @@
+
 <!DOCTYPE html>
-<html lang="zh-Hant">
+
+<html lang="zh">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>📅 日置川旅遊互動行程表</title>
-  <link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css">
-  <link rel="stylesheet" href="https://cdn.datatables.net/responsive/2.4.1/css/responsive.dataTables.min.css">
-  <style>
-  body {
-    font-family: "Segoe UI", "微軟正黑體", sans-serif;
-    background: linear-gradient(to bottom, #f3f6fb, #eaf1f8);
-    padding: 30px;
-    color: #333;
-  }
-  h2 {
-    color: #1a237e;
-    font-size: 28px;
-    margin-bottom: 15px;
-    text-shadow: 1px 1px 2px #ccc;
-  }
-  #weather-box, #animated-weather, #weather-extra, #date-nav {
-    background-color: #fff;
-    padding: 15px 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-    margin-bottom: 20px;
-  }
-  table.dataTable {
-    background-color: #fff;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-  }
-  table.dataTable thead th {
-    background: linear-gradient(to right, #e3f2fd, #bbdefb);
-    color: #1a237e;
-    font-weight: bold;
-    border-bottom: 2px solid #90caf9;
-  }
-  table.dataTable tbody td {
-    border-bottom: 1px solid #eee;
-  }
-  table.dataTable tbody tr:hover {
-    background-color: #f1f8ff;
-  }
-  </style>
-<link rel="stylesheet" href="https://cdn.datatables.net/rowgroup/1.3.1/css/rowGroup.dataTables.min.css">
+<meta charset="utf-8"/>
+<title>日置川旅遊互動行程表</title>
+<link href="https://cdn.datatables.net/1.13.4/css/jquery.dataTables.min.css" rel="stylesheet" type="text/css"/>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<style>
+        body {
+            font-family: "Segoe UI", sans-serif;
+            background: #f5f7fa;
+            padding: 20px;
+            color: #333;
+        }
+        h2 {
+            color: #1a73e8;
+        }
+        table.dataTable {
+            border-collapse: collapse !important;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0,0,0,0.05);
+        }
+        th {
+            background-color: #e3f2fd !important;
+            color: #333;
+        }
+        td, th {
+            padding: 8px;
+        }
+        #weather-box {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            background: #fff3cd;
+            color: #856404;
+            border-radius: 6px;
+        }
+    </style>
+<link href="https://cdn.datatables.net/responsive/2.4.1/css/responsive.dataTables.min.css" rel="stylesheet"/><script src="https://cdn.datatables.net/responsive/2.4.1/js/dataTables.responsive.min.js"></script>
+<style>
+    body {
+        font-family: "Segoe UI", "微軟正黑體", sans-serif;
+        background: linear-gradient(to bottom, #f3f6fb, #eaf1f8);
+        padding: 30px;
+        color: #333;
+    }
+    h2 {
+        color: #1a237e;
+        font-size: 28px;
+        margin-bottom: 15px;
+        text-shadow: 1px 1px 2px #ccc;
+    }
+    #weather-box, #animated-weather, #weather-extra, #date-nav {
+        background-color: #fff;
+        padding: 15px 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        margin-bottom: 20px;
+    }
+    table.dataTable {
+        background-color: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+    table.dataTable thead th {
+        background: linear-gradient(to right, #e3f2fd, #bbdefb);
+        color: #1a237e;
+        font-weight: bold;
+        border-bottom: 2px solid #90caf9;
+    }
+    table.dataTable tbody td {
+        border-bottom: 1px solid #eee;
+    }
+    table.dataTable tbody tr:hover {
+        background-color: #f1f8ff;
+    }
+    tr[id^="date_"] > td {
+        background-color: #fce4ec !important;
+        font-weight: bold;
+        font-size: 15px;
+        border-top: 2px solid #f06292;
+    }
+</style>
 </head>
 <body>
-  <h2>📅 日置川旅遊互動行程表</h2>
-  <div id="weather-box">⏳ 正在載入即時天氣資料...</div>
-  <div id="animated-weather">
-    <h3>⛅ 即時天氣動畫</h3>
-    <div><span id="weather-icon">⏳</span><span id="weather-desc">載入中...</span></div>
-  </div>
-  <div id="weather-extra">
-    <h3>🌦️ 地區即時天氣</h3>
-    <ul>
-      <li>📍 田邊市：<span id="weather-tanabe">讀取中...</span></li>
-      <li>♨️ 龍神温泉：<span id="weather-ryujin">讀取中...</span></li>
-      <li>🏖️ 白浜温泉：<span id="weather-shirahama">讀取中...</span></li>
-    </ul>
-  </div>
-  <div id="date-nav"></div>
-
-  <table id="itinerary" class="display responsive nowrap" style="width:100%">
-    <thead>
-      <tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td>
-        <th></th><th>日期</th><th>時間區段</th><th>車程</th><th>活動內容</th><th>電話</th><th>地圖</th><th>地址</th></tr>
-    </thead>
-    <tbody>
-<tr id="date_0911"><td>📅 9/11 (四)　☀️</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/11 (四)</td><td>12:00</td><td></td><td>📍 關西機場出關</td><td></td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=關西機場出關" target="_blank">📍 點我開啟地圖</a></td><td>1 Senshukukokita, Izumisano, Osaka 549-0001 日本</td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/11 (四)</td><td>13:30</td><td>🚗</td><td>📍 租車出發</td><td></td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=租車出發" target="_blank">📍 點我開啟地圖</a></td><td>1 Senshukukokita, Izumisano, Osaka 549-0001 日本</td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/11 (四)</td><td>13:30~14:50</td><td>🚗</td><td>元嶋神社 鳥居 [天神崎元島第二駐車場]</td><td>0739-26-9929</td><td><a href="https://www.google.com/maps?q=22-41+Mera,+Tanabe,+Wakayama+646-0058,+日本" target="_blank">📍 點我開啟地圖</a></td><td>22-41 Mera, Tanabe, Wakayama 646-0058 日本</td></tr><tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>同上</td><td>（步行5分）</td><td></td><td>田辺目良郵便局（停好車，走路5分鐘到郵局拍照）</td><td>0739-26-1153</td><td><a href="https://www.google.com/maps?q=24-29+Mera,+Tanabe,+Wakayama+646-0058,+日本" target="_blank">📍 點我開啟地圖</a></td><td>24-29 Mera, Tanabe, Wakayama 646-0058 日本</td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/11 (四)</td><td>14:50~15:20</td><td></td><td>元嶋神社 鳥居 [天神崎元島第二駐車場]</td><td></td><td></td><td>22-41 Mera, Tanabe, Wakayama 646-0058 日本</td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/11 (四)</td><td>15:20~15:30</td><td>🚗</td><td>🎣 釣具店 - BAYマルチョウ（10分鐘）</td><td>0739-26-6300</td><td><a href="https://www.google.com/maps?q=和歌山県田辺市稲成町230" target="_blank">📍 點我開啟地圖</a></td><td>230-3 Inaricho, Tanabe, Wakayama 646-0051日本</td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/11 (四)</td><td>15:30~16:00</td><td></td><td>🎣 釣具店 - BAYマルチョウ（30分鐘）</td><td></td><td></td><td>230-3 Inaricho, Tanabe, Wakayama 646-0051 日本</td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/11 (四)</td><td>16:00~16:10</td><td>🚗</td><td>📍 鬪雞神社（10分鐘）</td><td>0739-22-0155</td><td><a href="https://www.google.com/maps?q=和歌山県田辺市東陽1-1" target="_blank">📍 點我開啟地圖</a></td><td>1-1 Toyo, Tanabe, Wakayama 646-0029日本</td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/11 (四)</td><td>16:10~16:40</td><td></td><td>📍 鬪雞神社（30分鐘）</td><td></td><td></td><td>1-1 Toyo, Tanabe, Wakayama 646-0029日本</td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/11 (四)</td><td>16:40~16:50</td><td>🚗</td><td>🎣 釣具店 - ナニワ（10分鐘）</td><td>0739-26-0728</td><td><a href="https://www.google.com/maps?q=和歌山県田辺市高雄2丁目35番25号" target="_blank">📍 點我開啟地圖</a></td><td>2 Chome-35-25 Takao, Tanabe, Wakayama 646-0028 日本</td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/11 (四)</td><td>16:50~17:20</td><td></td><td>🎣 釣具店 - ナニワ（30分鐘）</td><td></td><td></td><td>2 Chome-35-25 Takao, Tanabe, Wakayama 646-0028日本</td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/11 (四)</td><td>17:20~17:35</td><td>🚗</td><td>🛒 超市 - オークワ（15分鐘）</td><td>0739-47-6800</td><td><a href="https://www.google.com/maps?q=33.699151,135.427697" target="_blank">📍 點我開啟地圖</a></td><td>154-1 Asso, Kamitonda, Nishimuro District, Wakayama 649-2105 日本</td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/11 (四)</td><td>17:35~18:00</td><td></td><td>🛒 超市 - オークワ（25分鐘）</td><td></td><td></td><td>95-1 Koya, Wakayama, 640-8435日本</td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/11 (四)</td><td>18:00~18:10</td><td>🚗</td><td>🛒 超市 - エバグリーン（10分鐘）</td><td>0739-47-2288</td><td><a href="https://www.google.com/maps?q=564-1+Ikuma,+Kamitonda,+Wakayama+649-2103+日本" target="_blank">📍 點我開啟地圖</a></td><td>564-1 Ikuma, 上富田町 Kamitonda, Nishimuro District, Wakayama 649-2103 日本</td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/11 (四)</td><td>18:10~18:40</td><td></td><td>🛒 超市 - エバグリーン（30分鐘）</td><td></td><td></td><td>564-1 Ikuma, 上富田町 Kamitonda, Nishimuro District, Wakayama 649-2103 日本</td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/11 (四)</td><td>18:40~19:00</td><td></td><td>🏠 森のお宿（20分鐘）</td><td></td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=森のお宿" target="_blank">📍 點我開啟地圖</a></td><td>880-2 O, Shirahama, Nishimuro District, Wakayama 646-0312日本</td></tr>
-<tr id="date_0912"><td>📅 9/12 (五)　⛅</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/12 (五)</td><td>整天</td><td></td><td>📍 日置川鮎釣</td><td></td><td><a href="https://www.google.com/maps?q=33.674167,135.544028" target="_blank">📍 點我開啟地圖</a></td><td></td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/12 (五)</td><td>16:30~17:30</td><td></td><td>♨️ えびね温泉（60分鐘）</td><td>0739-53-0366</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=えびね温泉+和歌山県西牟婁郡白浜町向平504" target="_blank">📍 點我開啟地圖</a></td><td>和歌山県西牟婁郡白浜町向平504</td></tr>
-<tr id="date_0913"><td>📅 9/13 (六)　🌤️</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/13 (六)</td><td>08:00~09:25</td><td>🚗</td><td>和歌山県日高川 伊藤荘（オトリ店）</td><td>0738-57-0624</td><td><a href="https://www.google.com/maps?q=29+Kumanogawa,+Hidakagawa,+Hidaka+District,+Wakayama+644-1242,+Japan" target="_blank">📍 點我開啟地圖</a></td><td>〒644-1242 和歌山県日高郡日高川町熊野川29</td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/13 (六)</td><td>09:30~15:00</td><td></td><td>📍 釣魚 + 山野正博（オトリ）</td><td></td><td><a href="https://www.google.com/maps?q=21+Harabiura,+Hidakagawa,+Hidaka+District,+Wakayama+644-1133,+Japan" target="_blank">📍 點我開啟地圖</a></td><td>21 Harabiura, Hidakagawa, Hidaka District, Wakayama 644-1133, Japan</td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/13 (六)</td><td>15:00~16:00</td><td>🚗</td><td>♨️ 龍神温泉元湯（60分鐘） ※[約 173NTD] [自備毛巾]</td><td>0739-79-0726</td><td><a href="https://www.google.com/maps?q=和歌山県田辺市龍神村龍神37" target="_blank">📍 點我開啟地圖</a></td><td>和歌山県田辺市龍神村龍神37</td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/13 (六)</td><td>16:00~17:00</td><td></td><td>♨️ 龍神温泉元湯（60分鐘） ※[約 173NTD] [自備毛巾]</td><td></td><td></td><td>和歌山県田辺市龍神村龍神37</td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/13 (六)</td><td>17:10~18:30</td><td>🚗</td><td>🏠 森のお宿（80分鐘）</td><td>0739-54-0345</td><td></td><td>和歌山県西牟婁郡白浜町大880-2</td></tr>
-<tr id="date_0914"><td>📅 9/14 (日)　🌦️</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/14 (日)</td><td>整天</td><td></td><td>📍 日置川鮎釣</td><td></td><td><a href="https://www.google.com/maps?q=33.674167,135.544028" target="_blank">📍 點我開啟地圖</a></td><td></td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/14 (日)</td><td>晚餐後</td><td></td><td>🛒 超市 - エバグリーン</td><td></td><td><a href="https://www.google.com/maps?q=564-1+Ikuma,+Kamitonda,+Wakayama+649-2103+日本" target="_blank">📍 點我開啟地圖</a></td><td>564-1 Ikuma, 上富田町 Kamitonda, Nishimuro District, Wakayama 649-2103 日本</td></tr>
-<tr id="date_0915"><td>📅 9/15 (一)　☀️</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/15 (一)</td><td>整天</td><td></td><td>📍 日置川鮎釣</td><td></td><td><a href="https://www.google.com/maps?q=33.674167,135.544028" target="_blank">📍 點我開啟地圖</a></td><td></td></tr>
-<tr id="date_0916"><td>📅 9/16 (二)　⛅</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/16 (二)</td><td>09:00</td><td></td><td>🏠 森のお宿 退房</td><td></td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=森のお宿+退房" target="_blank">📍 點我開啟地圖</a></td><td>和歌山県西牟婁郡白浜町大880-2</td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/16 (二)</td><td>09:00~09:30</td><td>🚗</td><td>🏞️ 三段壁・三段壁洞窟（30分鐘）</td><td>0739-42-4495</td><td><a href="https://www.google.com/maps?q=2927-52,+Shirahama,+Nishimuro+District,+Wakayama+649-2211,+日本" target="_blank">📍 點我開啟地圖</a></td><td>和歌山県西牟婁郡白浜町2927-52</td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/16 (二)</td><td>09:30~11:30</td><td></td><td>🏞️ 三段壁・三段壁洞窟（120分鐘）</td><td></td><td><a href="https://www.google.com/maps?q=2927-52,+Shirahama,+Nishimuro+District,+Wakayama+649-2211,+日本" target="_blank">📍 點我開啟地圖</a></td><td>和歌山県西牟婁郡白浜町2927-52</td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/16 (二)</td><td>11:30~11:45</td><td>🚗</td><td>📍 とれとれ魚市場（15分鐘）</td><td></td><td></td><td>和歌山県西牟婁郡白浜町堅田2521</td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/16 (二)</td><td>11:45~13:30</td><td></td><td>📍 とれとれ魚市場（105分鐘）</td><td></td><td></td><td>和歌山県西牟婁郡白浜町堅田2521</td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/16 (二)</td><td>13:30~13:45</td><td>🚗</td><td>♨️ 白浜温泉（15分鐘）</td><td>0739-42-3016</td><td><a href="https://www.google.com/maps?q=和歌山県西牟婁郡白浜町１６６８" target="_blank">📍 點我開啟地圖</a></td><td>和歌山県西牟婁郡白浜町1668</td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/16 (二)</td><td>13:45~14:45</td><td></td><td>♨️ 白浜温泉（60分鐘）</td><td></td><td></td><td>和歌山県西牟婁郡白浜町1668</td></tr>
-<tr><td class='details-control'><span style='color:green;font-size:1.2em;'>➕</span></td><td>9/16 (二)</td><td>14:45~17:00</td><td>🚗</td><td>📍 關西機場（135分鐘）</td><td></td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=關西機場" target="_blank">📍 點我開啟地圖</a></td><td></td></tr>
-</tbody>
-  </table>
-
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
+<h2>📅 日置川旅遊互動行程表</h2>
+<div id="weather-box">正在查詢即時天氣資料...</div>
+<div id="animated-weather" style="margin-top:1em;">
+<h3>⛅ 即時天氣動畫</h3>
+<div style="font-size: 16px;">
+<span id="weather-icon" style="font-size: 48px;">⏳</span>
+<span id="weather-desc" style="margin-left: 10px;">載入中...</span>
+</div>
+</div>
 <script>
-$(document).ready(function () {
-  var table = $('#dataTable').DataTable({
-    order: [[0, 'asc'], [1, 'asc']],
-    pageLength: 100,
-    rowGroup: {
-      dataSrc: 0
-    },
-    columnDefs: [
-      { targets: [0], visible: false }, // 隱藏 group 列
-    ]
-  });
+      async function updateWeatherAnimation() {
+        try {
+          const url = "https://api.open-meteo.com/v1/forecast?latitude=33.723&longitude=135.379&current=temperature_2m,weathercode&timezone=Asia%2FTokyo";
+          const res = await fetch(url);
+          const data = await res.json();
+          const code = data.current.weathercode;
+          const temp = data.current.temperature_2m;
+          const map = {
+            0: ["☀️", "晴朗"],
+            1: ["🌤️", "晴時多雲"],
+            2: ["⛅", "局部多雲"],
+            3: ["☁️", "陰天"],
+            45: ["🌫️", "有霧"],
+            51: ["🌦️", "間歇性小雨"],
+            61: ["🌧️", "小雨"],
+            95: ["⛈️", "雷雨"]
+          };
+          const weather = map[code] || ["❓", "未知天氣"];
+          document.getElementById("weather-icon").innerText = weather[0];
+          document.getElementById("weather-desc").innerText = `${weather[1]}・${temp}°C`;
+        } catch {
+          document.getElementById("weather-icon").innerText = "⚠️";
+          document.getElementById("weather-desc").innerText = "無法取得天氣資料";
+        }
+      }
+      updateWeatherAnimation();
+    </script>
+<div id="weather-extra" style="margin-top:1em;">
+<h3>🌦️ 地區即時天氣</h3>
+<ul style="font-size: 14px; line-height: 1.6;">
+<li>📍 田邊市：<span id="weather-tanabe">讀取中...</span></li>
+<li>♨️ 龍神温泉：<span id="weather-ryujin">讀取中...</span></li>
+<li>🏖️ 白浜温泉：<span id="weather-shirahama">讀取中...</span></li>
+</ul>
+</div>
+<script>
+      async function fetchWeather(name, lat, lon, elementId) {
+        try {
+          const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,precipitation,weathercode&timezone=Asia%2FTokyo`;
+          const res = await fetch(url);
+          const data = await res.json();
+          const t = data.current.temperature_2m;
+          const r = data.current.precipitation;
+          const w = data.current.weathercode;
+          const map = {0:"☀️ 晴",1:"🌤️",2:"⛅",3:"☁️",45:"🌫️",51:"🌦️",61:"🌧️",95:"⛈️"};
+          document.getElementById(elementId).innerText = `${map[w]||'☁️'} ${t}°C，降水 ${r}mm/h`;
+        } catch {
+          document.getElementById(elementId).innerText = "⚠️ 無法取得資料";
+        }
+      }
+      fetchWeather("田邊市", 33.723, 135.379, "weather-tanabe");
+      fetchWeather("龍神温泉", 33.905, 135.584, "weather-ryujin");
+      fetchWeather("白浜温泉", 33.681, 135.345, "weather-shirahama");
+    </script>
+<div id="date-nav"><h3>📅 快速跳轉到每日行程</h3><a href="#date_0911" style="margin-right:1em;">📅 9/11 (四)　☀️</a><a href="#date_0912" style="margin-right:1em;">📅 9/12 (五)　⛅</a><a href="#date_0913" style="margin-right:1em;">📅 9/13 (六)　🌤️</a><a href="#date_0914" style="margin-right:1em;">📅 9/14 (日)　🌦️</a><a href="#date_0915" style="margin-right:1em;">📅 9/15 (一)　☀️</a><a href="#date_0916" style="margin-right:1em;">📅 9/16 (二)　⛅</a></div><table class="display responsive nowrap" id="itinerary">
+<thead>
+<tr style="text-align: right;"><th>日期</th><th>時間區段</th><th>車程</th><th>活動地點 / 行程內容</th><th>電話</th><th>Google地圖連結</th><th>地址</th></tr>
+</thead>
+<tbody>
+<tr id="date_0911"><td>📅 9/11 (四)　☀️</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>9/11 (四)</td><td>12:00</td><td></td><td>📍 關西機場出關</td><td></td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=關西機場出關" target="_blank">📍 點我開啟地圖</a></td><td>1 Senshukukokita, Izumisano, Osaka 549-0001 日本</td></tr>
+<tr><td>9/11 (四)</td><td>13:30</td><td>🚗</td><td>📍 租車出發</td><td></td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=租車出發" target="_blank">📍 點我開啟地圖</a></td><td>1 Senshukukokita, Izumisano, Osaka 549-0001 日本</td></tr>
+<tr><td>9/11 (四)</td><td>13:30~14:50</td><td>🚗</td><td>元嶋神社 鳥居 [天神崎元島第二駐車場]</td><td>0739-26-9929</td><td><a href="https://www.google.com/maps?q=22-41+Mera,+Tanabe,+Wakayama+646-0058,+日本" target="_blank">📍 點我開啟地圖</a></td><td>22-41 Mera, Tanabe, Wakayama 646-0058 日本</td></tr><tr><td>同上</td><td>（步行5分）</td><td></td><td>田辺目良郵便局（停好車，走路5分鐘到郵局拍照）</td><td>0739-26-1153</td><td><a href="https://www.google.com/maps?q=24-29+Mera,+Tanabe,+Wakayama+646-0058,+日本" target="_blank">📍 點我開啟地圖</a></td><td>24-29 Mera, Tanabe, Wakayama 646-0058 日本</td></tr>
+<tr><td>9/11 (四)</td><td>14:50~15:20</td><td></td><td>元嶋神社 鳥居 [天神崎元島第二駐車場]</td><td></td><td></td><td>22-41 Mera, Tanabe, Wakayama 646-0058 日本</td></tr>
+<tr><td>9/11 (四)</td><td>15:20~15:30</td><td>🚗</td><td>🎣 釣具店 - BAYマルチョウ（10分鐘）</td><td>0739-26-6300</td><td><a href="https://www.google.com/maps?q=和歌山県田辺市稲成町230" target="_blank">📍 點我開啟地圖</a></td><td>230-3 Inaricho, Tanabe, Wakayama 646-0051日本</td></tr>
+<tr><td>9/11 (四)</td><td>15:30~16:00</td><td></td><td>🎣 釣具店 - BAYマルチョウ（30分鐘）</td><td></td><td></td><td>230-3 Inaricho, Tanabe, Wakayama 646-0051 日本</td></tr>
+<tr><td>9/11 (四)</td><td>16:00~16:10</td><td>🚗</td><td>📍 鬪雞神社（10分鐘）</td><td>0739-22-0155</td><td><a href="https://www.google.com/maps?q=和歌山県田辺市東陽1-1" target="_blank">📍 點我開啟地圖</a></td><td>1-1 Toyo, Tanabe, Wakayama 646-0029日本</td></tr>
+<tr><td>9/11 (四)</td><td>16:10~16:40</td><td></td><td>📍 鬪雞神社（30分鐘）</td><td></td><td></td><td>1-1 Toyo, Tanabe, Wakayama 646-0029日本</td></tr>
+<tr><td>9/11 (四)</td><td>16:40~16:50</td><td>🚗</td><td>🎣 釣具店 - ナニワ（10分鐘）</td><td>0739-26-0728</td><td><a href="https://www.google.com/maps?q=和歌山県田辺市高雄2丁目35番25号" target="_blank">📍 點我開啟地圖</a></td><td>2 Chome-35-25 Takao, Tanabe, Wakayama 646-0028 日本</td></tr>
+<tr><td>9/11 (四)</td><td>16:50~17:20</td><td></td><td>🎣 釣具店 - ナニワ（30分鐘）</td><td></td><td></td><td>2 Chome-35-25 Takao, Tanabe, Wakayama 646-0028日本</td></tr>
+<tr><td>9/11 (四)</td><td>17:20~17:35</td><td>🚗</td><td>🛒 超市 - オークワ（15分鐘）</td><td>0739-47-6800</td><td><a href="https://www.google.com/maps?q=33.699151,135.427697" target="_blank">📍 點我開啟地圖</a></td><td>154-1 Asso, Kamitonda, Nishimuro District, Wakayama 649-2105 日本</td></tr>
+<tr><td>9/11 (四)</td><td>17:35~18:00</td><td></td><td>🛒 超市 - オークワ（25分鐘）</td><td></td><td></td><td>95-1 Koya, Wakayama, 640-8435日本</td></tr>
+<tr><td>9/11 (四)</td><td>18:00~18:10</td><td>🚗</td><td>🛒 超市 - エバグリーン（10分鐘）</td><td>0739-47-2288</td><td><a href="https://www.google.com/maps?q=564-1+Ikuma,+Kamitonda,+Wakayama+649-2103+日本" target="_blank">📍 點我開啟地圖</a></td><td>564-1 Ikuma, 上富田町 Kamitonda, Nishimuro District, Wakayama 649-2103 日本</td></tr>
+<tr><td>9/11 (四)</td><td>18:10~18:40</td><td></td><td>🛒 超市 - エバグリーン（30分鐘）</td><td></td><td></td><td>564-1 Ikuma, 上富田町 Kamitonda, Nishimuro District, Wakayama 649-2103 日本</td></tr>
+<tr><td>9/11 (四)</td><td>18:40~19:00</td><td></td><td>🏠 森のお宿（20分鐘）</td><td></td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=森のお宿" target="_blank">📍 點我開啟地圖</a></td><td>880-2 O, Shirahama, Nishimuro District, Wakayama 646-0312日本</td></tr>
+<tr id="date_0912"><td>📅 9/12 (五)　⛅</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>9/12 (五)</td><td>整天</td><td></td><td>📍 日置川鮎釣</td><td></td><td><a href="https://www.google.com/maps?q=33.674167,135.544028" target="_blank">📍 點我開啟地圖</a></td><td></td></tr>
+<tr><td>9/12 (五)</td><td>16:30~17:30</td><td></td><td>♨️ えびね温泉（60分鐘）</td><td>0739-53-0366</td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=えびね温泉+和歌山県西牟婁郡白浜町向平504" target="_blank">📍 點我開啟地圖</a></td><td>和歌山県西牟婁郡白浜町向平504</td></tr>
+<tr id="date_0913"><td>📅 9/13 (六)　🌤️</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>9/13 (六)</td><td>08:00~09:25</td><td>🚗</td><td>和歌山県日高川 伊藤荘（オトリ店）</td><td>0738-57-0624</td><td><a href="https://www.google.com/maps?q=29+Kumanogawa,+Hidakagawa,+Hidaka+District,+Wakayama+644-1242,+Japan" target="_blank">📍 點我開啟地圖</a></td><td>〒644-1242 和歌山県日高郡日高川町熊野川29</td></tr>
+<tr><td>9/13 (六)</td><td>09:30~15:00</td><td></td><td>📍 釣魚 + 山野正博（オトリ）</td><td></td><td><a href="https://www.google.com/maps?q=21+Harabiura,+Hidakagawa,+Hidaka+District,+Wakayama+644-1133,+Japan" target="_blank">📍 點我開啟地圖</a></td><td>21 Harabiura, Hidakagawa, Hidaka District, Wakayama 644-1133, Japan</td></tr>
+<tr><td>9/13 (六)</td><td>15:00~16:00</td><td>🚗</td><td>♨️ 龍神温泉元湯（60分鐘） ※[約 173NTD] [自備毛巾]</td><td>0739-79-0726</td><td><a href="https://www.google.com/maps?q=和歌山県田辺市龍神村龍神37" target="_blank">📍 點我開啟地圖</a></td><td>和歌山県田辺市龍神村龍神37</td></tr>
+<tr><td>9/13 (六)</td><td>16:00~17:00</td><td></td><td>♨️ 龍神温泉元湯（60分鐘） ※[約 173NTD] [自備毛巾]</td><td></td><td></td><td>和歌山県田辺市龍神村龍神37</td></tr>
+<tr><td>9/13 (六)</td><td>17:10~18:30</td><td>🚗</td><td>🏠 森のお宿（80分鐘）</td><td>0739-54-0345</td><td></td><td>和歌山県西牟婁郡白浜町大880-2</td></tr>
+<tr id="date_0914"><td>📅 9/14 (日)　🌦️</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>9/14 (日)</td><td>整天</td><td></td><td>📍 日置川鮎釣</td><td></td><td><a href="https://www.google.com/maps?q=33.674167,135.544028" target="_blank">📍 點我開啟地圖</a></td><td></td></tr>
+<tr><td>9/14 (日)</td><td>晚餐後</td><td></td><td>🛒 超市 - エバグリーン</td><td></td><td><a href="https://www.google.com/maps?q=564-1+Ikuma,+Kamitonda,+Wakayama+649-2103+日本" target="_blank">📍 點我開啟地圖</a></td><td>564-1 Ikuma, 上富田町 Kamitonda, Nishimuro District, Wakayama 649-2103 日本</td></tr>
+<tr id="date_0915"><td>📅 9/15 (一)　☀️</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>9/15 (一)</td><td>整天</td><td></td><td>📍 日置川鮎釣</td><td></td><td><a href="https://www.google.com/maps?q=33.674167,135.544028" target="_blank">📍 點我開啟地圖</a></td><td></td></tr>
+<tr id="date_0916"><td>📅 9/16 (二)　⛅</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>9/16 (二)</td><td>09:00</td><td></td><td>🏠 森のお宿 退房</td><td></td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=森のお宿+退房" target="_blank">📍 點我開啟地圖</a></td><td>和歌山県西牟婁郡白浜町大880-2</td></tr>
+<tr><td>9/16 (二)</td><td>09:00~09:30</td><td>🚗</td><td>🏞️ 三段壁・三段壁洞窟（30分鐘）</td><td>0739-42-4495</td><td><a href="https://www.google.com/maps?q=2927-52,+Shirahama,+Nishimuro+District,+Wakayama+649-2211,+日本" target="_blank">📍 點我開啟地圖</a></td><td>和歌山県西牟婁郡白浜町2927-52</td></tr>
+<tr><td>9/16 (二)</td><td>09:30~11:30</td><td></td><td>🏞️ 三段壁・三段壁洞窟（120分鐘）</td><td></td><td><a href="https://www.google.com/maps?q=2927-52,+Shirahama,+Nishimuro+District,+Wakayama+649-2211,+日本" target="_blank">📍 點我開啟地圖</a></td><td>和歌山県西牟婁郡白浜町2927-52</td></tr>
+<tr><td>9/16 (二)</td><td>11:30~11:45</td><td>🚗</td><td>📍 とれとれ魚市場（15分鐘）</td><td></td><td></td><td>和歌山県西牟婁郡白浜町堅田2521</td></tr>
+<tr><td>9/16 (二)</td><td>11:45~13:30</td><td></td><td>📍 とれとれ魚市場（105分鐘）</td><td></td><td></td><td>和歌山県西牟婁郡白浜町堅田2521</td></tr>
+<tr><td>9/16 (二)</td><td>13:30~13:45</td><td>🚗</td><td>♨️ 白浜温泉（15分鐘）</td><td>0739-42-3016</td><td><a href="https://www.google.com/maps?q=和歌山県西牟婁郡白浜町１６６８" target="_blank">📍 點我開啟地圖</a></td><td>和歌山県西牟婁郡白浜町1668</td></tr>
+<tr><td>9/16 (二)</td><td>13:45~14:45</td><td></td><td>♨️ 白浜温泉（60分鐘）</td><td></td><td></td><td>和歌山県西牟婁郡白浜町1668</td></tr>
+<tr><td>9/16 (二)</td><td>14:45~17:00</td><td>🚗</td><td>📍 關西機場（135分鐘）</td><td></td><td><a href="https://www.google.com/maps/search/?api=1&amp;query=關西機場" target="_blank">📍 點我開啟地圖</a></td><td></td></tr>
+</tbody>
+</table>
+<script>
+        $(document).ready(function () {
+    responsive: true,
+            $('#itinerary').DataTable({
+                "pageLength": 100,
+                "order": [],
+                "language": {
+                    "search": "🔍 搜尋：",
+                    "lengthMenu": "每頁顯示 _MENU_ 筆（包含該天所有行程）",
+                    "info": "顯示第 _START_ 到 _END_ 筆，共 _TOTAL_ 筆",
+                    "paginate": {
+                        "previous": "⬅️",
+                        "next": "➡️"
+                    }
+                }
+            });
 
-  // 加號展開功能
-  $('#dataTable tbody').on('click', 'td.details-control', function () {
-    var tr = $(this).closest('tr');
-    var row = table.row(tr);
-
-    if (row.child.isShown()) {
-      row.child.hide();
-      tr.removeClass('shown');
-      $(this).html('<span style="color:green;font-size:1.2em;">➕</span>');
-    } else {
-      row.child(format(row.data())).show();
-      tr.addClass('shown');
-      $(this).html('<span style="color:red;font-size:1.2em;">➖</span>');
-    }
-  });
-
-  function format(d) {
-    return '<div style="padding:10px;">'
-      + '<strong>活動：</strong>' + d[3] + '<br>'
-      + '<strong>電話：</strong>' + d[4] + '<br>'
-      + '<strong>地址：</strong>' + d[6] + '<br>'
-      + '<strong>地圖：</strong>' + d[5] + '</div>';
-  }
-
-  // 自動插入展開欄位圖示
-  $('#dataTable tbody tr').each(function () {
-    $(this).prepend('<td class="details-control"><span style="color:green;font-size:1.2em;">➕</span></td>');
-  });
-
-  $('#dataTable thead tr').prepend('<th></th>');
-});
-</script>
-
-  <script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
-  <script src="https://cdn.datatables.net/responsive/2.4.1/js/dataTables.responsive.min.js"></script>
-
-  <script>
-
-async function tryFetchWeather(urls, parseFunc, failMessage, targetId) {
-  for (let url of urls) {
-    try {
-      const res = await fetch(url);
-      const data = await res.json();
-      parseFunc(data, targetId);
-      return;
-    } catch (e) {
-      console.warn("Fetch failed, try next proxy:", e);
-    }
-  }
-  document.getElementById(targetId).innerText = failMessage;
-}
-
-function parseWeatherBox(data, id) {
-  const code = data.current.weathercode;
-  const temp = data.current.temperature_2m;
-  const rain = data.current.precipitation ?? 0;
-  const map = {
-    0: "☀️ 晴", 1: "🌤️ 晴時多雲", 2: "⛅ 多雲", 3: "☁️ 陰",
-    45: "🌫️ 霧", 51: "🌦️ 毛毛雨", 61: "🌧️ 雨", 95: "⛈️ 雷雨"
-  };
-  const text = `${map[code] || "❓"}，氣溫 ${temp}°C，降水 ${rain} mm/h`;
-  document.getElementById(id).innerText = text;
-}
-
-function parseWeatherIcon(data, id) {
-  const code = data.current.weathercode;
-  const temp = data.current.temperature_2m;
-  const map = {
-    0: ["☀️", "晴朗"], 1: ["🌤️", "晴時多雲"], 2: ["⛅", "局部多雲"],
-    3: ["☁️", "陰天"], 45: ["🌫️", "有霧"], 51: ["🌦️", "間歇性小雨"],
-    61: ["🌧️", "小雨"], 95: ["⛈️", "雷雨"]
-  };
-  const weather = map[code] || ["❓", "未知天氣"];
-  document.getElementById("weather-icon").innerText = weather[0];
-  document.getElementById("weather-desc").innerText = `${weather[1]}・${temp}°C`;
-}
-
-const apiCore = "https://api.open-meteo.com/v1/forecast?latitude=33.723&longitude=135.379&current=temperature_2m,precipitation,weathercode&timezone=Asia%2FTokyo";
-const proxies = [
-  "https://corsproxy.io/?" + encodeURIComponent(apiCore),
-  "https://thingproxy.freeboard.io/fetch/" + apiCore
-];
-
-tryFetchWeather(proxies, parseWeatherBox, "⚠️ 無法取得即時天氣資料。", "weather-box");
-tryFetchWeather(proxies, parseWeatherIcon, "⚠️", "animated-weather");
-
-function fetchWeatherGroup(name, lat, lon, elementId) {
-  const api = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,precipitation,weathercode&timezone=Asia%2FTokyo`;
-  const urls = [
-    "https://corsproxy.io/?" + encodeURIComponent(api),
-    "https://thingproxy.freeboard.io/fetch/" + api
-  ];
-  tryFetchWeather(urls, (data, id) => {
-    const t = data.current.temperature_2m;
-    const r = data.current.precipitation;
-    const w = data.current.weathercode;
-    const map = {0:"☀️ 晴",1:"🌤️",2:"⛅",3:"☁️",45:"🌫️",51:"🌦️",61:"🌧️",95:"⛈️"};
-    document.getElementById(id).innerText = `${map[w]||'☁️'} ${t}°C，降水 ${r}mm/h`;
-  }, "⚠️ 無法取得資料", elementId);
-}
-
-fetchWeatherGroup("田邊市", 33.723, 135.379, "weather-tanabe");
-fetchWeatherGroup("龍神温泉", 33.905, 135.584, "weather-ryujin");
-fetchWeatherGroup("白浜温泉", 33.681, 135.345, "weather-shirahama");
-
-</script>
-<script src="https://cdn.datatables.net/rowgroup/1.3.1/js/dataTables.rowGroup.min.js"></script>
+            // Open-Meteo API：和歌山田邊市座標
+            fetch("https://api.open-meteo.com/v1/forecast?latitude=33.723&longitude=135.379&current=temperature_2m,precipitation,weathercode&timezone=Asia%2FTokyo")
+            .then(res => res.json())
+            .then(data => {
+                const temp = data.current.temperature_2m;
+                const rain = data.current.precipitation;
+                const code = data.current.weathercode;
+                const codeMap = {
+                    0: "☀️ 晴",
+                    1: "🌤️ 晴時多雲",
+                    2: "⛅ 多雲",
+                    3: "☁️ 陰",
+                    45: "🌫️ 霧",
+                    51: "🌦️ 毛毛雨",
+                    61: "🌧️ 雨",
+                    71: "❄️ 雪",
+                    95: "⛈️ 雷雨"
+                };
+                const weatherText = codeMap[code] || "☁️";
+                document.getElementById("weather-box").innerHTML =
+                    `📍 田邊市即時天氣：<strong>${weatherText}</strong>，氣溫 <strong>${temp}°C</strong>，降水量 <strong>${rain} mm/h</strong>`;
+            })
+            .catch(() => {
+                document.getElementById("weather-box").innerText = "⚠️ 無法取得即時天氣資料。";
+            });
+        });
+    </script>
 </body>
 </html>
