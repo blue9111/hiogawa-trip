@@ -115,55 +115,74 @@
   <script src="https://cdn.datatables.net/responsive/2.4.1/js/dataTables.responsive.min.js"></script>
 
   <script>
-    $(document).ready(function () {
-      $('#itinerary').DataTable({
-        pageLength: 100,
-        order: [],
-        language: {
-          search: '🔍 搜尋：',
-          lengthMenu: '每頁顯示 _MENU_ 筆',
-          info: '顯示第 _START_ 到 _END_ 筆，共 _TOTAL_ 筆',
-          paginate: {
-            previous: '⬅️',
-            next: '➡️'
-          }
-        }
-      });
-    });
-  </script>
 
-  <script>
-    async function fetchWeatherData(lat, lon, elementId) {
-      try {
-        const cacheKey = `weather-${elementId}`;
-        const cached = sessionStorage.getItem(cacheKey);
-        const now = Date.now();
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          if (now - parsed.timestamp < 600000) {
-            document.getElementById(elementId).innerText = parsed.value;
-            return;
-          }
-        }
-
-        const url = `https://corsproxy.io/?https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,precipitation,weathercode&timezone=Asia%2FTokyo`;
-        const res = await fetch(url);
-        const data = await res.json();
-        const t = data.current.temperature_2m;
-        const r = data.current.precipitation;
-        const w = data.current.weathercode;
-        const map = {0:'☀️ 晴',1:'🌤️',2:'⛅',3:'☁️',45:'🌫️',51:'🌦️',61:'🌧️',95:'⛈️'};
-        const text = `${map[w]||'☁️'} ${t}°C，降水 ${r}mm/h`;
-        document.getElementById(elementId).innerText = text;
-        sessionStorage.setItem(cacheKey, JSON.stringify({ value: text, timestamp: now }));
-      } catch {
-        document.getElementById(elementId).innerText = '⚠️ 無法取得資料';
-      }
+async function tryFetchWeather(urls, parseFunc, failMessage, targetId) {
+  for (let url of urls) {
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+      parseFunc(data, targetId);
+      return;
+    } catch (e) {
+      console.warn("Fetch failed, try next proxy:", e);
     }
+  }
+  document.getElementById(targetId).innerText = failMessage;
+}
 
-    fetchWeatherData(33.723, 135.379, 'weather-tanabe');
-    fetchWeatherData(33.905, 135.584, 'weather-ryujin');
-    fetchWeatherData(33.681, 135.345, 'weather-shirahama');
-  </script>
+function parseWeatherBox(data, id) {
+  const code = data.current.weathercode;
+  const temp = data.current.temperature_2m;
+  const rain = data.current.precipitation ?? 0;
+  const map = {
+    0: "☀️ 晴", 1: "🌤️ 晴時多雲", 2: "⛅ 多雲", 3: "☁️ 陰",
+    45: "🌫️ 霧", 51: "🌦️ 毛毛雨", 61: "🌧️ 雨", 95: "⛈️ 雷雨"
+  };
+  const text = `${map[code] || "❓"}，氣溫 ${temp}°C，降水 ${rain} mm/h`;
+  document.getElementById(id).innerText = text;
+}
+
+function parseWeatherIcon(data, id) {
+  const code = data.current.weathercode;
+  const temp = data.current.temperature_2m;
+  const map = {
+    0: ["☀️", "晴朗"], 1: ["🌤️", "晴時多雲"], 2: ["⛅", "局部多雲"],
+    3: ["☁️", "陰天"], 45: ["🌫️", "有霧"], 51: ["🌦️", "間歇性小雨"],
+    61: ["🌧️", "小雨"], 95: ["⛈️", "雷雨"]
+  };
+  const weather = map[code] || ["❓", "未知天氣"];
+  document.getElementById("weather-icon").innerText = weather[0];
+  document.getElementById("weather-desc").innerText = `${weather[1]}・${temp}°C`;
+}
+
+const apiCore = "https://api.open-meteo.com/v1/forecast?latitude=33.723&longitude=135.379&current=temperature_2m,precipitation,weathercode&timezone=Asia%2FTokyo";
+const proxies = [
+  "https://corsproxy.io/?" + encodeURIComponent(apiCore),
+  "https://thingproxy.freeboard.io/fetch/" + apiCore
+];
+
+tryFetchWeather(proxies, parseWeatherBox, "⚠️ 無法取得即時天氣資料。", "weather-box");
+tryFetchWeather(proxies, parseWeatherIcon, "⚠️", "animated-weather");
+
+function fetchWeatherGroup(name, lat, lon, elementId) {
+  const api = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,precipitation,weathercode&timezone=Asia%2FTokyo`;
+  const urls = [
+    "https://corsproxy.io/?" + encodeURIComponent(api),
+    "https://thingproxy.freeboard.io/fetch/" + api
+  ];
+  tryFetchWeather(urls, (data, id) => {
+    const t = data.current.temperature_2m;
+    const r = data.current.precipitation;
+    const w = data.current.weathercode;
+    const map = {0:"☀️ 晴",1:"🌤️",2:"⛅",3:"☁️",45:"🌫️",51:"🌦️",61:"🌧️",95:"⛈️"};
+    document.getElementById(id).innerText = `${map[w]||'☁️'} ${t}°C，降水 ${r}mm/h`;
+  }, "⚠️ 無法取得資料", elementId);
+}
+
+fetchWeatherGroup("田邊市", 33.723, 135.379, "weather-tanabe");
+fetchWeatherGroup("龍神温泉", 33.905, 135.584, "weather-ryujin");
+fetchWeatherGroup("白浜温泉", 33.681, 135.345, "weather-shirahama");
+
+</script>
 </body>
 </html>
