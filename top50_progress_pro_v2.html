@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Top 50 追番進度條（進階版｜番號＋新增卡片＋自動儲存＋排序）</title>
+<style>
+:root{
+  --bg:#0b1220; --card:#0f172a; --muted:#9ca3af; --text:#e5e7eb; --bar:#111827;
+  --accent:#60a5fa; --accent2:#34d399; --border:#1f2937; --chip:#111827;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif}
+.wrap{max-width:1200px;margin:24px auto;padding:0 16px}
+h1{font-size:20px;margin:0 0 10px 0;color:#fff}
+.toolbar{
+  display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+  background:#0c1426;border:1px solid var(--border);padding:10px;border-radius:12px;margin-bottom:14px
+}
+.toolbar .group{display:flex;gap:8px;align-items:center}
+.toolbar input[type=text], .toolbar input[type=number], .toolbar select{
+  background:#0b1325;border:1px solid var(--border);color:var(--text);border-radius:10px;padding:8px 10px;min-width:140px;outline:none
+}
+.toolbar button{
+  background:#0b1325;border:1px solid var(--border);color:var(--text);border-radius:10px;padding:8px 12px;cursor:pointer
+}
+.toolbar .hint{font-size:12px;color:#94a3b8}
+.status{font-size:12px;color:#9ca3af;margin-left:auto;white-space:nowrap}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media (max-width:1000px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media (max-width:640px){.grid{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;position:relative}
+.banner{height:90px;display:flex;align-items:flex-end;padding:12px 14px;background:linear-gradient(45deg,#7b2ff7,#f107a3,#ff8a00);position:relative}
+.title{font-weight:800;letter-spacing:0.5px;text-shadow:0 2px 10px rgba(0,0,0,.4);outline:none}
+.title[contenteditable="true"]{border-bottom:1px dashed rgba(255,255,255,.35)}
+.nochip{
+  position:absolute;top:10px;left:10px;
+  background:var(--chip);border:1px solid var(--border);
+  color:#cbd5e1;border-radius:999px;padding:4px 8px;font-size:12px;font-weight:700;
+  box-shadow:0 4px 10px rgba(0,0,0,.25)
+}
+.body{padding:12px 14px 14px}
+.progress{height:10px;background:var(--bar);border-radius:999px;overflow:hidden;border:1px solid var(--border)}
+.fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .15s ease}
+.meta{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:12px;margin-top:8px}
+.controls{display:flex;align-items:center;gap:10px;margin-top:10px}
+.controls input[type=range]{flex:1;appearance:none;height:10px;border-radius:999px;background:#0b1325;border:1px solid var(--border);outline:none}
+.controls input[type=range]::-webkit-slider-thumb{appearance:none;width:18px;height:18px;border-radius:50%;background:#e5e7eb;border:2px solid #374151;box-shadow:0 2px 8px #0008;cursor:pointer}
+.controls .btn{width:28px;height:28px;border-radius:50%;border:1px solid #374151;background:#0b1325;color:#e5e7eb;cursor:pointer}
+.controls .tot{min-width:3.2em;text-align:center}
+.small{font-size:11px;color:#94a3b8}
+.cardfoot{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.del{font-size:11px;opacity:.8;cursor:pointer}
+.badge{font-size:10px;border:1px solid var(--border);padding:3px 6px;border-radius:999px;color:#9fb3c8}
+.hidden{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Top 50 追番進度條（進階版｜含番號）</h1>
+  <div class="toolbar">
+    <div class="group">
+      <input id="newTitle" type="text" placeholder="標題（例如：完美世界）">
+      <input id="newTotal" type="number" min="1" max="9999" value="100" title="總集數">
+      <button id="btnAdd">新增卡片</button>
+    </div>
+    <div class="group">
+      <input id="quickNo" type="number" min="1" max="9999" placeholder="番號">
+      <button id="btnQuick">快速番號→新增</button>
+    </div>
+    <div class="group">
+      <select id="sortBy" title="排序">
+        <option value="manual">排序：手動（建立順序）</option>
+        <option value="progressDesc">排序：進度高→低</option>
+        <option value="progressAsc">排序：進度低→高</option>
+        <option value="titleAZ">排序：標題 A→Z</option>
+        <option value="updatedDesc">排序：最近更新優先</option>
+      </select>
+      <button id="btnSort">一鍵排序</button>
+    </div>
+    <div class="group hint">滑桿改「已看」，± 改「總集數」，點標題可改名。初始 Top 50 已自動加入「番號」。</div>
+    <div id="saveStatus" class="status">已自動儲存</div>
+  </div>
+
+  <div id="grid" class="grid"></div>
+</div>
+
+<script>
+(function(){
+  const KEY = 'top50_progress_v2';
+  const $ = sel => document.querySelector(sel);
+  const grid = $('#grid');
+  const saveStatus = $('#saveStatus');
+
+  // ---- Data layer ----
+  function now(){ return Date.now(); }
+  function uid(){ return 'id-' + Math.random().toString(36).slice(2,9); }
+
+  // 初始 Top 50（示例：前5為你指定，之後以「作品 N」占位，可自行改名；仍保留番號 1~50）
+  const DefaultList = [
+    '完美世界','吞噬星空 第二季後半','逆天邪神','凡人修仙傳','拾又之國',
+    '作品 6','作品 7','作品 8','作品 9','作品 10',
+    '作品 11','作品 12','作品 13','作品 14','作品 15',
+    '作品 16','作品 17','作品 18','作品 19','作品 20',
+    '作品 21','作品 22','作品 23','作品 24','作品 25',
+    '作品 26','作品 27','作品 28','作品 29','作品 30',
+    '作品 31','作品 32','作品 33','作品 34','作品 35',
+    '作品 36','作品 37','作品 38','作品 39','作品 40',
+    '作品 41','作品 42','作品 43','作品 44','作品 45',
+    '作品 46','作品 47','作品 48','作品 49','作品 50'
+  ];
+
+  function load(){
+    try{
+      const raw = localStorage.getItem(KEY);
+      if(!raw) return null;
+      return JSON.parse(raw);
+    }catch(e){ console.warn(e); return null; }
+  }
+
+  // 初始化或讀取既有資料
+  let state = load();
+  if(!state){
+    state = {
+      items: DefaultList.map((t, i)=>({ id: uid(), title: t, seen:0, total:100, createdAt: now()+i, updatedAt: now()+i, order:i, no: i+1 })),
+      sort: 'manual'
+    };
+    persist();
+  }else{
+    // 遷移：若舊資料沒有番號，依「手動順序」對前 50 張卡片補番號 1~50（只補沒有 no 的）
+    const needNo = state.items.filter(x=>x.no==null).length;
+    if(needNo){
+      const byOrder = [...state.items].sort((a,b)=>(a.order??0)-(b.order??0));
+      let n = 1;
+      for(const it of byOrder){
+        if(n>50) break;
+        if(it.no==null){ it.no = n; n++; }
+      }
+      // 只更新 updatedAt 不動排序
+      const ts = now();
+      state.items.forEach(it=>{ if(it.no!=null && !it.updatedAt) it.updatedAt = ts; });
+      persist();
+    }
+  }
+
+  let saveTimer = null;
+  function scheduleSave(){
+    saveStatus.textContent = '儲存中…';
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(()=>{
+      persist();
+      saveStatus.textContent = '已自動儲存';
+    }, 300);
+  }
+  function persist(){
+    localStorage.setItem(KEY, JSON.stringify(state));
+  }
+
+  // ---- Render ----
+  function pct(it){ const t = Math.max(1, it.total||1), s = Math.min(Math.max(0,it.seen||0), t); return Math.round(s*100/t); }
+  function sortItems(list){
+    switch(state.sort){
+      case 'progressDesc': return list.sort((a,b)=>pct(b)-pct(a) || a.title.localeCompare(b.title,'zh-Hant'));
+      case 'progressAsc' : return list.sort((a,b)=>pct(a)-pct(b) || a.title.localeCompare(b.title,'zh-Hant'));
+      case 'titleAZ'     : return list.sort((a,b)=>a.title.localeCompare(b.title,'zh-Hant'));
+      case 'updatedDesc' : return list.sort((a,b)=>b.updatedAt-a.updatedAt);
+      case 'manual':
+      default: return list.sort((a,b)=>(a.order??0)-(b.order??0));
+    }
+  }
+
+  function render(){
+    grid.innerHTML = '';
+    const items = sortItems([...state.items]);
+    items.forEach((it)=> grid.appendChild(renderCard(it)) );
+  }
+
+  function renderCard(it){
+    const card = document.createElement('div');
+    card.className = 'card'; card.dataset.id = it.id;
+
+    card.innerHTML = `
+      <div class="banner">
+        <div class="title" contenteditable="false" spellcheck="false"></div>
+        <span class="nochip hidden"></span>
+      </div>
+      <div class="body">
+        <div class="progress"><div class="fill"></div></div>
+        <div class="meta"><span>已看：<b class="seen"></b> / <b class="total"></b></span><span class="pct"></span></div>
+        <div class="controls">
+          <button class="btn minus" title="總集數 -1">−</button>
+          <div class="tot"><span class="total"></span></div>
+          <button class="btn plus" title="總集數 +1">+</button>
+          <input type="range" class="slider" min="0" step="1">
+        </div>
+        <div class="cardfoot">
+          <span class="badge">更新：<span class="upd"></span></span>
+          <span class="del" title="移除這張卡片">刪除</span>
+        </div>
+      </div>
+    `;
+
+    const el = {
+      title: card.querySelector('.title'),
+      nochip: card.querySelector('.nochip'),
+      fill : card.querySelector('.fill'),
+      seen : card.querySelector('.seen'),
+      totalTop: card.querySelectorAll('.total')[0],
+      totalCtr: card.querySelectorAll('.total')[1],
+      slider: card.querySelector('.slider'),
+      minus : card.querySelector('.minus'),
+      plus  : card.querySelector('.plus'),
+      pct   : card.querySelector('.pct'),
+      upd   : card.querySelector('.upd'),
+      del   : card.querySelector('.del')
+    };
+
+    function refresh(){
+      const t = Math.max(1, it.total||1);
+      const s = Math.max(0, Math.min(it.seen||0, t));
+      const p = Math.round(s*100/t);
+      el.fill.style.width = p + '%';
+      el.pct.textContent = p + '%';
+      el.slider.max = t;
+      el.slider.value = s;
+      el.seen.textContent = s;
+      el.totalTop.textContent = t;
+      el.totalCtr.textContent = t;
+      el.title.textContent = it.title;
+      el.upd.textContent = new Date(it.updatedAt||it.createdAt||Date.now()).toLocaleString();
+
+      if(typeof it.no === 'number'){
+        el.nochip.textContent = '#' + String(it.no).padStart(2,'0');
+        el.nochip.classList.remove('hidden');
+      }else{
+        el.nochip.classList.add('hidden');
+      }
+    }
+
+    // interactions
+    el.slider.addEventListener('input', e => {
+      it.seen = parseInt(e.target.value||'0',10);
+      it.updatedAt = now();
+      refresh(); scheduleSave();
+    });
+    el.minus.addEventListener('click', ()=>{
+      it.total = Math.max(1, (it.total||1)-1);
+      if(it.seen > it.total) it.seen = it.total;
+      it.updatedAt = now();
+      refresh(); scheduleSave();
+    });
+    el.plus.addEventListener('click', ()=>{
+      it.total = Math.min(9999, (it.total||1)+1);
+      it.updatedAt = now();
+      refresh(); scheduleSave();
+    });
+
+    // editable title (click to edit)
+    el.title.addEventListener('click', ()=>{
+      if(el.title.getAttribute('contenteditable')==='true') return;
+      el.title.setAttribute('contenteditable','true');
+      el.title.focus();
+      // place caret at end
+      document.getSelection().selectAllChildren(el.title);
+      document.getSelection().collapseToEnd();
+    });
+    function commitTitle(){
+      if(el.title.getAttribute('contenteditable')!=='true') return;
+      const newT = (el.title.textContent||'').trim() || it.title;
+      el.title.setAttribute('contenteditable','false');
+      if(newT !== it.title){
+        it.title = newT; it.updatedAt = now(); scheduleSave();
+      } else {
+        // revert to clean text (trim extra spaces)
+        el.title.textContent = it.title;
+      }
+    }
+    el.title.addEventListener('blur', commitTitle);
+    el.title.addEventListener('keydown', (e)=>{
+      if(e.key==='Enter'){ e.preventDefault(); commitTitle(); }
+      if(e.key==='Escape'){ e.preventDefault(); el.title.textContent = it.title; el.title.blur(); }
+    });
+
+    // delete
+    el.del.addEventListener('click', ()=>{
+      if(!confirm('確定刪除這張卡片？')) return;
+      state.items = state.items.filter(x=>x.id!==it.id);
+      // normalize order
+      state.items.forEach((x,i)=> x.order = i);
+      scheduleSave();
+      card.remove();
+    });
+
+    // initial setup
+    refresh();
+    return card;
+  }
+
+  // ---- Add / Quick add ----
+  function addItem(title, total){
+    title = (title||'').trim();
+    if(!title){ alert('請輸入標題'); return; }
+    total = Math.max(1, Math.min(9999, parseInt(total||'100',10) || 100));
+    const it = { id: uid(), title, seen:0, total, createdAt: now(), updatedAt: now(), order: state.items.length };
+    state.items.push(it);
+    scheduleSave();
+    if(state.sort==='manual'){
+      grid.appendChild(renderCard(it));
+      window.scrollTo({top: document.body.scrollHeight, behavior:'smooth'});
+    }else{
+      render();
+    }
+  }
+
+  $('#btnAdd').addEventListener('click', ()=>{
+    addItem($('#newTitle').value, $('#newTotal').value);
+    $('#newTitle').value=''; $('#newTotal').value=100; $('#newTitle').focus();
+  });
+  $('#btnQuick').addEventListener('click', ()=>{
+    const n = parseInt($('#quickNo').value||'0',10);
+    if(!n || n<1){ alert('請輸入正確的番號'); return; }
+    addItem('作品 ' + n, $('#newTotal').value);
+    $('#quickNo').value='';
+  });
+
+  // ---- Sorting ----
+  const sortSel = $('#sortBy');
+  sortSel.value = state.sort || 'manual';
+  sortSel.addEventListener('change', ()=>{
+    state.sort = sortSel.value;
+    scheduleSave();
+  });
+  $('#btnSort').addEventListener('click', ()=>{
+    render();
+  });
+
+  // First render
+  render();
+})();
+</script>
+</body>
+</html>
