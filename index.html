@@ -30,7 +30,7 @@ h1{font-size:20px;margin:0 0 10px 0;color:#fff}
 @media (max-width:1000px){.grid{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:640px){.grid{grid-template-columns:1fr}}
 .card{box-shadow:0 2px 8px rgba(0,0,0,.08); background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;position:relative}
-.banner{height:90px;display:flex;align-items:flex-end;padding:12px 14px;background:linear-gradient(45deg,#7b2ff7,#f107a3,#ff8a00);position:relative}
+.banner{height:90px;display:flex;align-items:flex-end;padding:12px 14px;background:linear-gradient(45deg,#8ab4ff,#c58af9,#ff8ac8);position:relative}
 .title{font-weight:800;letter-spacing:0.5px;text-shadow:0 2px 10px rgba(0,0,0,.4);outline:none}
 .title[contenteditable="true"]{border-bottom:1px dashed rgba(255,255,255,.35)}
 .nochip{
@@ -44,9 +44,17 @@ h1{font-size:20px;margin:0 0 10px 0;color:#fff}
 .fill{
   height:100%;
   width:0%;
-  background:linear-gradient(90deg,#ff4d4d,#ff8a3d,#ffcf3d,#8dff3d,#3dffde,#3da8ff,#9f3dff);
+  background:linear-gradient(90deg,#00f5a0,#00d2ff,#4d5eff,#9b00ff);
   background-size:300% 100%;
-  animation:shine 4s linear infinite;
+  animation:shine 3.5s linear infinite;
+  position:relative;
+}
+.fill::after{
+  content:"";
+  position:absolute;inset:0;
+  background:linear-gradient( to bottom, rgba(255,255,255,.35), rgba(255,255,255,0) 40%, rgba(0,0,0,.08) 60%, rgba(0,0,0,0) );
+  mix-blend-mode:overlay;
+  pointer-events:none;
 }
 .meta{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:12px;margin-top:8px}
 .controls{display:flex;align-items:center;gap:10px;margin-top:10px}
@@ -84,7 +92,7 @@ h1{font-size:20px;margin:0 0 10px 0;color:#fff}
 }
 .controls .btn:hover{
   background:#e8e8e8;
-  transform:scale(1.08);
+  transform:scale(1.06);
 }
 .controls .btn:active{
   transform:scale(0.95);
@@ -100,6 +108,13 @@ h1{font-size:20px;margin:0 0 10px 0;color:#fff}
   0%{background-position:0% 50%}
   100%{background-position:300% 50%}
 }
+
+/* Prevent iPhone Safari auto-zoom on focus */
+input, button, select, textarea { font-size:16px !important; }
+@media screen and (max-width: 820px){
+  html{-webkit-text-size-adjust:100%;}
+}
+
 </style>
 </head>
 <body>
