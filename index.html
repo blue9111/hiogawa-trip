@@ -6,8 +6,8 @@
 <title>Top 50 追番進度條（進階版｜番號＋新增卡片＋自動儲存＋排序）</title>
 <style>
 :root{
-  --bg:#0b1220; --card:#0f172a; --muted:#9ca3af; --text:#e5e7eb; --bar:#111827;
-  --accent:#60a5fa; --accent2:#34d399; --border:#1f2937; --chip:#111827;
+  --bg:#f2f3f5; --card:#f9fafc; --muted:#555; --text:#111; --bar:#e5e7eb;
+  --accent:#60a5fa; --accent2:#34d399; --border:#d0d5dd; --chip:#ffffff;
 }
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Noto Sans TC','PingFang TC','Microsoft JhengHei',sans-serif}
@@ -29,7 +29,7 @@ h1{font-size:20px;margin:0 0 10px 0;color:#fff}
 .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
 @media (max-width:1000px){.grid{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:640px){.grid{grid-template-columns:1fr}}
-.card{background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;position:relative}
+.card{box-shadow:0 2px 8px rgba(0,0,0,.08); background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;position:relative}
 .banner{height:90px;display:flex;align-items:flex-end;padding:12px 14px;background:linear-gradient(45deg,#7b2ff7,#f107a3,#ff8a00);position:relative}
 .title{font-weight:800;letter-spacing:0.5px;text-shadow:0 2px 10px rgba(0,0,0,.4);outline:none}
 .title[contenteditable="true"]{border-bottom:1px dashed rgba(255,255,255,.35)}
@@ -40,19 +40,66 @@ h1{font-size:20px;margin:0 0 10px 0;color:#fff}
   box-shadow:0 4px 10px rgba(0,0,0,.25)
 }
 .body{padding:12px 14px 14px}
-.progress{height:10px;background:var(--bar);border-radius:999px;overflow:hidden;border:1px solid var(--border)}
-.fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .15s ease}
+.progress{height:12px;background:var(--bar);border-radius:999px;overflow:hidden;border:1px solid var(--border)}
+.fill{
+  height:100%;
+  width:0%;
+  background:linear-gradient(90deg,#ff4d4d,#ff8a3d,#ffcf3d,#8dff3d,#3dffde,#3da8ff,#9f3dff);
+  background-size:300% 100%;
+  animation:shine 4s linear infinite;
+}
 .meta{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:12px;margin-top:8px}
 .controls{display:flex;align-items:center;gap:10px;margin-top:10px}
-.controls input[type=range]{flex:1;appearance:none;height:10px;border-radius:999px;background:#0b1325;border:1px solid var(--border);outline:none}
-.controls input[type=range]::-webkit-slider-thumb{appearance:none;width:18px;height:18px;border-radius:50%;background:#e5e7eb;border:2px solid #374151;box-shadow:0 2px 8px #0008;cursor:pointer}
-.controls .btn{width:28px;height:28px;border-radius:50%;border:1px solid #374151;background:#0b1325;color:#e5e7eb;cursor:pointer}
+.controls input[type=range]{
+  flex:1;
+  appearance:none;
+  height:10px;
+  border-radius:999px;
+  background:#fff;
+  border:1px solid #d0d5dd;
+  outline:none;
+}
+.controls input[type=range]{
+  flex:1;
+  appearance:none;
+  height:10px;
+  border-radius:999px;
+  background:#fff;
+  border:1px solid #d0d5dd;
+  outline:none;
+}
+.controls .btn{
+  width:46px;
+  height:46px;
+  border-radius:50%;
+  border:1px solid #999;
+  background:#fff;
+  color:#333;
+  font-size:20px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  transition:0.15s;
+}
+.controls .btn:hover{
+  background:#e8e8e8;
+  transform:scale(1.08);
+}
+.controls .btn:active{
+  transform:scale(0.95);
+}
 .controls .tot{min-width:3.2em;text-align:center}
 .small{font-size:11px;color:#94a3b8}
 .cardfoot{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
 .del{font-size:11px;opacity:.8;cursor:pointer}
 .badge{font-size:10px;border:1px solid var(--border);padding:3px 6px;border-radius:999px;color:#9fb3c8}
 .hidden{display:none}
+
+@keyframes shine{
+  0%{background-position:0% 50%}
+  100%{background-position:300% 50%}
+}
 </style>
 </head>
 <body>
