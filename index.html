@@ -340,7 +340,7 @@ input, button, select, textarea { font-size:16px !important; }
 
 /* === 徽章放大 1/3 === */
 :root{
-  --star-size: 45px;
+  --star-size: 55px;
 }
 @media (max-width: 480px){
   :root{ --star-size: 36px; }
@@ -664,8 +664,7 @@ el.slider.max = t;
       const noEl = card.querySelector('.no-num');
       if(noEl){
         if(typeof it.no === 'number'){
-          noEl.textContent = '#' 
-      /* 右下番號：點擊修改、長按刪除 */
+          noEl.textContent = it.no.toString()/* 右下番號：點擊修改、長按刪除 */
       if(noEl && !noEl._bind){
         noEl._bind = true;
 
