@@ -368,6 +368,8 @@ input, button, select, textarea { font-size:16px !important; }
 }
 .card.flash-ok { animation: flash-ok 650ms ease-out; }
 
+
+.no-num{display:block !important;}
 </style>
 </head>
 <body>
@@ -583,10 +585,33 @@ el.slider.max = t;
       el.upd.textContent = fmt(it.updatedAt||it.createdAt||Date.now());
 
       
-      // 更新右下番號顯示
+            // --- 右下番號顯示 + 點擊可修改 ---
       const noEl = card.querySelector('.no-num');
-      if(noEl){
-        if(typeof it.no === 'number'){
+      if (noEl) {
+        if (typeof it.no === 'number') {
+          noEl.textContent = '#' + String(it.no).padStart(2, '0');
+        } else {
+          noEl.textContent = '';
+        }
+        noEl.style.cursor = 'pointer';
+        if (!noEl._bind) {
+          noEl._bind = True = true;  # mark bound
+          noEl.addEventListener('click', () => {
+            const input = prompt('輸入新的番號（數字）', it.no ?? '');
+            if (input === null) return;
+            const n = parseInt(input, 10);
+            if (!isNaN(n) && n > 0) {
+              it.no = n;
+              it.updatedAt = now();
+              refresh();
+              scheduleSave();
+            } else {
+              alert('請輸入正確的數字');
+            }
+          });
+        }
+      }
+      if(typeof it.no === 'number'){
           noEl.textContent = '#' 
       /* 右下番號：點擊修改、長按刪除 */
       if(noEl && !noEl._bind){
