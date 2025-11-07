@@ -529,6 +529,38 @@ input, button, select, textarea { font-size:16px !important; }
     0 2px 5px rgba(0,0,0,.08);
 }
 
+
+/* === 中央主操作區：+番號 / +卡片 併排置中 === */
+.toolbar { justify-content: space-between; }
+.toolbar .primary-center{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  margin: 0 auto;               /* 置中 */
+  order: 0;
+}
+.toolbar .primary-center .sep{
+  opacity:.35;
+  user-select:none;
+  font-weight:700;
+  padding:0 4px;
+}
+
+/* 手機優化：主操作區自動換行、置中對齊、好按 */
+@media (max-width: 820px){
+  .toolbar{ justify-content:center; }
+  .toolbar .primary-center{
+    flex-wrap:wrap;
+    justify-content:center;
+  }
+  .toolbar input[type=text], .toolbar input[type=number], .toolbar select{
+    min-width: 120px;
+  }
+}
+
+/* 將兩顆主按鈕視覺靠近一點 */
+#btnQuick, #btnAdd{ margin-left: 2px; margin-right: 2px; }
+
 </style>
 </head>
 <body>
