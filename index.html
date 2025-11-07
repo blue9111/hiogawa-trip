@@ -362,6 +362,89 @@ input, button, select, textarea { font-size:16px !important; }
 
 
 .no-num{display:block !important; pointer-events:auto !important; cursor:pointer !important;}
+
+.no-num{font-size:26px !important;font-weight:800 !important;color:#333 !important;}
+
+/* === 番號移動到右下角 === */
+.no-num {
+  position:absolute !important;
+  right:10px !important;
+  bottom:8px !important;
+  left:auto !important;
+  top:auto !important;
+  transform:none !important;
+  background:rgba(255,255,255,0.9);
+  padding:2px 6px;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
+
+
+/* === 番號：金屬質感徽章 === */
+.no-num{
+  background: linear-gradient(135deg, #fff2a8 0%, #ffd700 35%, #ffb300 60%, #ffdf75 80%, #fff6c9 100%) !important;
+  color:#5c3f00 !important;
+  font-weight:900 !important;
+  border-radius:50% !important;
+  padding:0 !important;
+  width:32px !important;
+  height:32px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  border:1px solid rgba(160,120,40,0.6) !important;
+  box-shadow:
+    0 0 8px rgba(255,200,0,.6),
+    0 3px 6px rgba(0,0,0,.25),
+    inset 0 0 6px rgba(255,255,255,.65),
+    inset 0 -6px 10px rgba(130,80,10,.35) !important;
+}
+
+/* 掃光效果（微光移動） */
+.no-num::after{
+  content:"";
+  position:absolute;
+  top:-40%;
+  left:-150%;
+  width:60%;
+  height:180%;
+  background:linear-gradient(
+    120deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,.95) 48%,
+    rgba(255,255,255,0) 100%
+  );
+  transform:skewX(-25deg);
+  animation: num-sweep 3.8s ease-in-out infinite;
+  mix-blend-mode:screen;
+  pointer-events:none;
+}
+
+@keyframes num-sweep{
+  0%   { left:-150%; opacity:0; }
+  20%  { left:-120%; opacity:.35; }
+  55%  { left:110%;  opacity:.9; }
+  70%  { left:110%;  opacity:0; }
+  100% { left:110%;  opacity:0; }
+}
+
+
+/* Ensure number badge is visible and large, no leading #, no zero padding */
+.no-num{font-size:22px !important;font-weight:900 !important;color:#4a3b00 !important;}
+
+
+/* === 金屬徽章縮小為 10px === */
+.no-num{
+  width:10px !important;
+  height:10px !important;
+  font-size:6px !important;
+  border-radius:50% !important;
+  padding:0 !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+}
+
 </style>
 </head>
 <body>
@@ -621,7 +704,7 @@ el.slider.max = t;
         noEl.addEventListener('mouseleave', cancel);
         noEl.addEventListener('touchend', cancel);
       }
-+ String(it.no).padStart(2,'0');
+
         } else {
           noEl.textContent = '';
         }
