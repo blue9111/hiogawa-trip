@@ -169,6 +169,205 @@ input, button, select, textarea { font-size:16px !important; }
 @media (max-width: 480px){
   .title{ font-size:42px; }
 }
+
+/* === 星形金色徽章（鏡面 + 微掃光）=== */
+/* 可調參數 */
+:root{
+  --star-size: 68px;              /* 星形大小（寬高） */
+  --star-font: 16px;              /* 文字大小（>=16px 可避免 iPhone 放大） */
+  --star-rotate: 0deg;            /* 星形微旋轉角度 */
+  --star-sweep-sec: 3.6s;         /* 掃光週期 */
+}
+
+/* 讓原本的圓角膠囊徽章變成星形徽章 */
+.nochip{
+  /* 幾何外觀 */
+  width: var(--star-size);
+  height: var(--star-size);
+  padding: 0;                     /* 改為正方形容器，由 clip-path 切星形 */
+  border: none !important;
+  border-radius: 0;
+  position: absolute;             /* 保持原本置中位置 */
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%) rotate(var(--star-rotate));
+  overflow: hidden;
+
+  /* 內容置中 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* 金色鏡面底色 */
+  background: linear-gradient(135deg, #fff2a8 0%, #ffd700 30%, #ffb300 55%, #ffdf75 78%, #fff6c9 100%);
+  color: #5c3f00 !important;
+  font-weight: 900;
+  font-size: var(--star-font);
+  letter-spacing: 0.5px;
+  text-shadow: 0 1px 0 rgba(255,255,255,.6);
+
+  /* 立體與外發光 */
+  box-shadow:
+    0 0 10px rgba(255, 198, 0, .55),
+    0 6px 14px rgba(0,0,0,.22),
+    inset 0 0 10px rgba(255,255,255,.65),
+    inset 0 -10px 18px rgba(194, 121, 0, .35);
+
+  /* 五角星裁切（正五角星）*/
+  /* 參考極座標轉換，適配居中顯示 */
+  clip-path: polygon(
+    50% 0%,
+    61% 35%,
+    98% 35%,
+    68% 57%,
+    79% 91%,
+    50% 70%,
+    21% 91%,
+    32% 57%,
+    2% 35%,
+    39% 35%
+  );
+}
+
+/* 鏡面高光層（固定柔亮） */
+.nochip::before{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    linear-gradient(160deg, rgba(255,255,255,.85) 0%, rgba(255,255,255,.22) 28%, rgba(255,255,255,0) 60%),
+    radial-gradient(120% 90% at 20% 10%, rgba(255,255,255,.6) 0%, rgba(255,255,255,0) 65%);
+  mix-blend-mode:screen;
+  pointer-events:none;
+}
+
+/* 掃光層（微掃光） */
+.nochip::after{
+  content:"";
+  position:absolute;
+  top:-20%;
+  left:-160%;
+  width:60%;
+  height:140%;
+  background: linear-gradient(
+    120deg,
+    rgba(255,255,255,0) 0%,
+    rgba(255,255,255,.95) 48%,
+    rgba(255,255,255,0) 100%
+  );
+  transform: skewX(-25deg);
+  animation: star-sweep var(--star-sweep-sec) ease-in-out infinite;
+  mix-blend-mode:screen;
+  pointer-events:none;
+}
+
+/* 掃光動畫節奏（前段停留、後段滑過） */
+@keyframes star-sweep{
+  0%   { left:-160%; opacity:.0; }
+  18%  { left:-120%; opacity:.35; }
+  45%  { left:115%;  opacity:.9; }
+  60%  { left:115%;  opacity:.0; }
+  100% { left:115%;  opacity:.0; }
+}
+
+/* 小螢幕自動縮小星形，避免壓到標題 */
+@media (max-width: 480px){
+  :root{
+    --star-size: 56px;
+    --star-font: 15px;
+  }
+}
+
+
+/* === 覆蓋：徽章靠右 + 依進度變色 === */
+.nochip{
+  right: 12px;
+  left: auto;
+  transform: rotate(var(--star-rotate));
+}
+
+/* <50%：綠色 */
+.nochip.low {
+  background: linear-gradient(135deg, #d7ffcf, #57d38c, #2ba356);
+  color: #0f3d21 !important;
+  box-shadow:
+    0 0 10px rgba(60, 190, 120, .55),
+    0 6px 14px rgba(0,0,0,.22),
+    inset 0 0 10px rgba(255,255,255,.55),
+    inset 0 -10px 18px rgba(0, 80, 50, .35);
+}
+
+/* 50~79%：藍色 */
+.nochip.mid {
+  background: linear-gradient(135deg, #d6ecff, #5aa8ff, #1c64d1);
+  color: #0b243f !important;
+  box-shadow:
+    0 0 10px rgba(90, 160, 255, .55),
+    0 6px 14px rgba(0,0,0,.22),
+    inset 0 0 10px rgba(255,255,255,.55),
+    inset 0 -10px 18px rgba(0, 60, 160, .35);
+}
+
+/* ≥80%：金色（沿用原始星形樣式），此類只作為狀態標記 */
+.nochip.high { }
+
+
+/* === 覆蓋調整：星形徽章置中（取消靠右）＋ 尺寸縮小一半 === */
+:root{
+  --star-size: 34px;   /* 原 68px 改為 34px */
+}
+
+/* 小螢幕再縮一點 */
+@media (max-width: 480px){
+  :root{ --star-size: 28px; }
+}
+
+/* 回到置中（原本模板的 top + left 置中方式） */
+.nochip{
+  right: auto !important;
+  left: 50% !important;
+  transform: translateX(-50%) rotate(var(--star-rotate)) !important;
+}
+
+
+/* === 覆蓋：徽章靠右 === */
+.nochip{
+  left:auto !important;
+  right:12px !important;
+  transform:rotate(var(--star-rotate)) !important;
+}
+
+
+/* === 徽章放大 1/3 === */
+:root{
+  --star-size: 45px;
+}
+@media (max-width: 480px){
+  :root{ --star-size: 36px; }
+}
+
+
+/* 右下番號小標註 */
+.no-num{
+  position:absolute;
+  bottom:6px;
+  right:8px;
+  font-size:12px;
+  font-weight:700;
+  color:#ffffffcc;
+  text-shadow:0 0 4px rgba(0,0,0,.6);
+  pointer-events:none;
+}
+
+
+/* 一鍵完食：成功視覺提示 */
+@keyframes flash-ok {
+  0% { box-shadow: 0 0 0 rgba(72,187,120,0); }
+  20% { box-shadow: 0 0 0 6px rgba(72,187,120,.35); }
+  100% { box-shadow: 0 0 0 rgba(72,187,120,0); }
+}
+.card.flash-ok { animation: flash-ok 650ms ease-out; }
+
 </style>
 </head>
 <body>
@@ -311,6 +510,7 @@ input, button, select, textarea { font-size:16px !important; }
 
     card.innerHTML = `
       <div class="banner">
+        <span class="no-num"></span>
         <div class="title" contenteditable="false" spellcheck="false"></div>
         <span class="nochip hidden"></span>
       </div>
@@ -349,9 +549,29 @@ input, button, select, textarea { font-size:16px !important; }
       const t = Math.max(1, it.total||1);
       const s = Math.max(0, Math.min(it.seen||0, t));
       const p = Math.round(s*100/t);
-      el.fill.style.width = p + '%';
+      
+  
+      
+      /* 星形徽章清空內容 */
+      el.nochip.textContent = "";
+/* 移除徽章文字顯示 */
+      el.nochip.textContent = "";
+/* 依百分比切換徽章顏色（<50 綠 / <80 藍 / 其餘金） */
+  el.nochip.classList.remove("low", "mid", "high");
+  if (p < 50) {
+    el.nochip.classList.add("low");
+  } else if (p < 80) {
+    el.nochip.classList.add("mid");
+  } else {
+    el.nochip.classList.add("high");
+  }
+el.fill.style.width = p + '%';
       el.pct.textContent = p + '%';
-      el.slider.max = t;
+      
+      /* 同步：徽章顯示百分比 */
+      
+      el.nochip.classList.remove('hidden');
+el.slider.max = t;
       el.slider.value = s;
       el.seen.textContent = s;
       el.totalTop.textContent = t;
@@ -359,7 +579,57 @@ input, button, select, textarea { font-size:16px !important; }
       el.title.textContent = it.title;
       el.upd.textContent = fmt(it.updatedAt||it.createdAt||Date.now());
 
-      if(typeof it.no === 'number'){
+      
+      // 更新右下番號顯示
+      const noEl = card.querySelector('.no-num');
+      if(noEl){
+        if(typeof it.no === 'number'){
+          noEl.textContent = '#' 
+      /* 右下番號：點擊修改、長按刪除 */
+      if(noEl && !noEl._bind){
+        noEl._bind = true;
+
+        // 點擊修改番號
+        noEl.addEventListener('click', () => {
+          const input = prompt('請輸入番號（數字）', it.no != null ? it.no : '');
+          if(input===null) return;
+          const n = parseInt(input,10);
+          if(!isNaN(n) && n>0){
+            it.no = n;
+            it.updatedAt = now();
+            refresh();
+            scheduleSave();
+          } else {
+            alert('請輸入正確的數字');
+          }
+        });
+
+        // 長按刪除卡片
+        let pressTimer = null;
+        const start = () => {
+          pressTimer = setTimeout(() => {
+            if(confirm('確定刪除這張卡片？')){
+              state.items = state.items.filter(x=>x.id!==it.id);
+              state.items.forEach((x,i)=> x.order=i);
+              scheduleSave();
+              card.remove();
+            }
+          }, 600);
+        };
+        const cancel = () => { clearTimeout(pressTimer); };
+
+        noEl.addEventListener('mousedown', start);
+        noEl.addEventListener('touchstart', start);
+        noEl.addEventListener('mouseup', cancel);
+        noEl.addEventListener('mouseleave', cancel);
+        noEl.addEventListener('touchend', cancel);
+      }
++ String(it.no).padStart(2,'0');
+        } else {
+          noEl.textContent = '';
+        }
+      }
+if(typeof it.no === 'number'){
         el.nochip.textContent = '#' + String(it.no).padStart(2,'0');
         el.nochip.classList.remove('hidden');
       }else{
@@ -421,7 +691,50 @@ input, button, select, textarea { font-size:16px !important; }
       card.remove();
     });
 
+    // 點擊徽章修改番號
+    el.nochip.addEventListener('click', () => {
+      const current = (it.no != null ? it.no : '');
+      const input = prompt('請輸入番號（數字）', current);
+      if(input===null) return;
+      const n = parseInt(input,10);
+      if(!isNaN(n) && n>0){
+        it.no = n;
+        it.updatedAt = now();
+        refresh();
+        scheduleSave();
+      } else {
+        alert('請輸入正確的數字');
+      }
+    });
+
+
     // initial setup
+    
+    // 一鍵完食：長按卡片本體（含進度區域） => seen = total
+    (function(){
+      let pressTimer = null;
+      const pressStart = () => {
+        pressTimer = setTimeout(() => {
+          it.seen = Math.max(0, Math.min(it.total||1, it.total||1)); // seen = total
+          it.updatedAt = now();
+          refresh();
+          scheduleSave();
+          // 視覺提示
+          card.classList.add('flash-ok');
+          setTimeout(()=>card.classList.remove('flash-ok'), 700);
+        }, 650); // 長按 650ms
+      };
+      const pressCancel = () => { if(pressTimer) clearTimeout(pressTimer); pressTimer = null; };
+
+      // 綁定在整張卡片（含滑桿與按鈕區）
+      card.addEventListener('mousedown', pressStart);
+      card.addEventListener('touchstart', pressStart);
+      card.addEventListener('mouseup', pressCancel);
+      card.addEventListener('mouseleave', pressCancel);
+      card.addEventListener('touchend', pressCancel);
+      card.addEventListener('touchcancel', pressCancel);
+    })();
+
     refresh();
     return card;
   }
@@ -518,6 +831,16 @@ input, button, select, textarea { font-size:16px !important; }
 
   // First render
   render();
+
+  // 顯示一次性提示（2.5秒）
+  (function(){
+    const bar = document.getElementById('saveStatus');
+    if(!bar) return;
+    const old = bar.textContent;
+    bar.textContent = '提示：長按卡片可一鍵完食';
+    setTimeout(()=>{ bar.textContent = old; }, 2500);
+  })();
+
 })();
 </script>
 </body>
