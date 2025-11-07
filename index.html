@@ -499,13 +499,13 @@ input, button, select, textarea { font-size:16px !important; }
   <h1>Top 50 追番進度條（進階版｜含番號）</h1>
   <div class="toolbar">
     <div class="group">
+      <input id="quickNo" type="number" min="1" max="9999" placeholder="番號">
+      <button id="btnQuick">快速番號→新增</button>
+    </div>
+    <div class="group">
       <input id="newTitle" type="text" placeholder="標題（例如：完美世界）">
       <input id="newTotal" type="number" min="1" max="9999" value="100" title="總集數">
       <button id="btnAdd">卡片</button>
-    </div>
-    <div class="group">
-      <input id="quickNo" type="number" min="1" max="9999" placeholder="番號">
-      <button id="btnQuick">快速番號→新增</button>
     </div>
     <div class="group">
       <select id="sortBy" title="排序">
