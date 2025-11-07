@@ -31,13 +31,21 @@ h1{font-size:20px;margin:0 0 10px 0;color:#fff}
 @media (max-width:640px){.grid{grid-template-columns:1fr}}
 .card{box-shadow:0 2px 8px rgba(0,0,0,.08); background:var(--card);border:1px solid var(--border);border-radius:16px;overflow:hidden;position:relative}
 .banner{height:90px;display:flex;align-items:flex-end;padding:12px 14px;background:linear-gradient(45deg,#8ab4ff,#c58af9,#ff8ac8);position:relative}
-.title{font-weight:800;letter-spacing:0.5px;text-shadow:0 2px 10px rgba(0,0,0,.4);outline:none}
+.title{font-weight:800;letter-spacing:0.5px;text-shadow:0 2px 10px rgba(0,0,0,.4);outline:none font-size:75px;}
 .title[contenteditable="true"]{border-bottom:1px dashed rgba(255,255,255,.35)}
 .nochip{
-  position:absolute;top:10px;left:10px;
-  background:var(--chip);border:1px solid var(--border);
-  color:#cbd5e1;border-radius:999px;padding:4px 8px;font-size:12px;font-weight:700;
-  box-shadow:0 4px 10px rgba(0,0,0,.25)
+  position:absolute;
+  top:10px;
+  left:50%;
+  transform:translateX(-50%);
+  background:var(--chip);
+  border:1px solid var(--border);
+  color:#333;
+  border-radius:999px;
+  padding:4px 10px;
+  font-size:12px;
+  font-weight:700;
+  box-shadow:0 4px 8px rgba(0,0,0,.15);
 }
 .body{padding:12px 14px 14px}
 .progress{height:12px;background:var(--bar);border-radius:999px;overflow:hidden;border:1px solid var(--border)}
@@ -56,8 +64,23 @@ h1{font-size:20px;margin:0 0 10px 0;color:#fff}
   mix-blend-mode:overlay;
   pointer-events:none;
 }
-.meta{display:flex;align-items:center;justify-content:space-between;color:var(--muted);font-size:12px;margin-top:8px}
-.controls{display:flex;align-items:center;gap:10px;margin-top:10px}
+.meta{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  color:var(--muted);
+  font-size:12px;
+  margin-top:8px;
+}
+.controls{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  margin:8px auto 0;
+  max-width:520px;
+}
 .controls input[type=range]{
   flex:1;
   appearance:none;
@@ -77,13 +100,13 @@ h1{font-size:20px;margin:0 0 10px 0;color:#fff}
   outline:none;
 }
 .controls .btn{
-  width:65px;
-  height:65px;
+  width:75px;
+  height:75px;
   border-radius:50%;
   border:1px solid #999;
   background:#fff;
   color:#333;
-  font-size:28px;
+  font-size:32px;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -111,9 +134,22 @@ h1{font-size:20px;margin:0 0 10px 0;color:#fff}
 .controls .btn:active{
   transform:scale(0.95);
 }
+.controls .btn:hover{
+  background:#e8e8e8;
+  transform:scale(1.06);
+}
+.controls .btn:active{
+  transform:scale(0.95);
+}
 .controls .tot{min-width:3.2em;text-align:center}
 .small{font-size:11px;color:#94a3b8}
-.cardfoot{display:flex;justify-content:space-between;align-items:center;margin-top:8px}
+.cardfoot{
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  align-items:center;
+  margin-top:8px;
+}
 .del{font-size:11px;opacity:.8;cursor:pointer}
 .badge{font-size:10px;border:1px solid var(--border);padding:3px 6px;border-radius:999px;color:#9fb3c8}
 .hidden{display:none}
@@ -129,6 +165,10 @@ input, button, select, textarea { font-size:16px !important; }
   html{-webkit-text-size-adjust:100%;}
 }
 
+
+@media (max-width: 480px){
+  .title{ font-size:42px; }
+}
 </style>
 </head>
 <body>
@@ -154,6 +194,11 @@ input, button, select, textarea { font-size:16px !important; }
       </select>
       <button id="btnSort">一鍵排序</button>
     </div>
+    <div class="group">
+      <button id="btnExport">匯出</button>
+      <button id="btnImport">匯入</button>
+      <input id="fileImport" type="file" accept=".txt,text/plain" style="display:none">
+    </div>
     <div class="group hint">滑桿改「已看」，± 改「總集數」，點標題可改名。初始 Top 50 已自動加入「番號」。</div>
     <div id="saveStatus" class="status">已自動儲存</div>
   </div>
@@ -166,6 +211,15 @@ input, button, select, textarea { font-size:16px !important; }
   const KEY = 'top50_progress_v2';
   const $ = sel => document.querySelector(sel);
   const grid = $('#grid');
+
+  function fmt(ts){
+    const d = new Date(ts||Date.now());
+    return new Intl.DateTimeFormat('zh-Hant', {
+      year:'numeric', month:'2-digit', day:'2-digit',
+      hour:'2-digit', minute:'2-digit'
+    }).format(d);
+  }
+
   const saveStatus = $('#saveStatus');
 
   // ---- Data layer ----
@@ -303,7 +357,7 @@ input, button, select, textarea { font-size:16px !important; }
       el.totalTop.textContent = t;
       el.totalCtr.textContent = t;
       el.title.textContent = it.title;
-      el.upd.textContent = new Date(it.updatedAt||it.createdAt||Date.now()).toLocaleString();
+      el.upd.textContent = fmt(it.updatedAt||it.createdAt||Date.now());
 
       if(typeof it.no === 'number'){
         el.nochip.textContent = '#' + String(it.no).padStart(2,'0');
@@ -397,6 +451,58 @@ input, button, select, textarea { font-size:16px !important; }
     if(!n || n<1){ alert('請輸入正確的番號'); return; }
     addItem('作品 ' + n, $('#newTotal').value);
     $('#quickNo').value='';
+  });
+
+  
+  // ---- Export / Import ----
+  function itemsInDisplayOrder(){
+    return sortItems([...state.items]);
+  }
+  $('#btnExport').addEventListener('click', ()=>{
+    const lines = itemsInDisplayOrder().map(it => `${it.title} ${it.seen}/${it.total}`);
+    const blob = new Blob([lines.join('\n')], {type:'text/plain;charset=utf-8'});
+    const a = document.createElement('a');
+    const pad = n=> String(n).padStart(2,'0');
+    const d = new Date();
+    const name = `top50_progress_${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}_${pad(d.getHours())}${pad(d.getMinutes())}.txt`;
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    URL.revokeObjectURL(a.href);
+    a.remove();
+  });
+  $('#btnImport').addEventListener('click', ()=> $('#fileImport').click());
+  $('#fileImport').addEventListener('change', async (e)=>{
+    const f = e.target.files && e.target.files[0];
+    if(!f) return;
+    const txt = await f.text();
+    const lines = txt.split(/\r?\n/).map(s=>s.trim()).filter(Boolean);
+    let updated = 0, added = 0;
+    const byTitle = new Map(state.items.map(x=>[x.title, x]));
+    for(const line of lines){
+      const m = line.match(/^(.*)\s+(\d+)\s*\/\s*(\d+)\s*$/);
+      if(!m) continue;
+      const title = m[1].trim();
+      const seen = parseInt(m[2],10);
+      const total = parseInt(m[3],10);
+      const nowts = now();
+      if(byTitle.has(title)){
+        const it = byTitle.get(title);
+        it.seen = Math.min(Math.max(0, seen), Math.max(1,total));
+        it.total = Math.max(1, total);
+        it.updatedAt = nowts;
+        updated++;
+      }else{
+        const it = { id: uid(), title, seen: Math.max(0, Math.min(seen,total)), total: Math.max(1,total), createdAt: nowts, updatedAt: nowts, order: state.items.length };
+        state.items.push(it);
+        added++;
+      }
+    }
+    scheduleSave();
+    render();
+    saveStatus.textContent = `已匯入：更新 ${updated} 筆、新增 ${added} 筆`;
+    e.target.value = '';
   });
 
   // ---- Sorting ----
