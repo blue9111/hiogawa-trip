@@ -445,6 +445,53 @@ input, button, select, textarea { font-size:16px !important; }
   justify-content:center !important;
 }
 
+
+/* === C 風格：iPhone 膠囊主按鈕（新增卡片） === */
+#btnAdd{
+  font-size:16px !important;
+  font-weight:700;
+  padding:12px 18px !important;
+  border-radius:22px !important;
+  border:1px solid rgba(0,0,0,.08) !important;
+  background: linear-gradient(180deg, #ffffff 0%, #f4f6fb 100%) !important;
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.8) inset,
+    0 10px 20px rgba(0,0,0,.08),
+    0 3px 6px rgba(0,0,0,.06);
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+#btnAdd::before{
+  content:"+";
+  display:inline-block;
+  margin-right:6px;
+  font-weight:900;
+}
+#btnAdd:hover{
+  transform: translateY(-1px);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.85) inset,
+    0 14px 26px rgba(0,0,0,.12),
+    0 6px 10px rgba(0,0,0,.08);
+  filter: saturate(1.05);
+}
+#btnAdd:active{
+  transform: translateY(0);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,.7) inset,
+    0 6px 12px rgba(0,0,0,.10),
+    0 2px 5px rgba(0,0,0,.08);
+}
+/* 避免被拉成巨大的圓角塊 */
+.toolbar .group{ align-items:center; }
+.toolbar button{ line-height:1; }
+
+
+/* === 拖曳排序樣式 === */
+.card[draggable="true"]{ cursor: grab; }
+.card.dragging{ opacity:.75; transform: scale(.99); cursor: grabbing; }
+.grid.drag-active .card:not(.dragging){ transition: transform .12s ease, box-shadow .12s ease; }
+.grid.drag-active{ outline: 2px dashed rgba(99,102,241,.35); outline-offset: 6px; border-radius: 14px; }
+
 </style>
 </head>
 <body>
@@ -487,6 +534,56 @@ input, button, select, textarea { font-size:16px !important; }
   const KEY = 'top50_progress_v2';
   const $ = sel => document.querySelector(sel);
   const grid = $('#grid');
+
+  // ---- Drag & Drop helpers ----
+  let dndEnabled = false;
+  function enableGridDnd(){
+    if(dndEnabled) return;
+    dndEnabled = true;
+
+    grid.addEventListener('dragover', (e)=>{
+      if(state.sort!=='manual') return;
+      e.preventDefault();
+      grid.classList.add('drag-active');
+      const afterElement = getDragAfterElement(grid, e.clientY);
+      const dragging = grid.querySelector('.card.dragging');
+      if(!dragging) return;
+      if(afterElement==null){
+        grid.appendChild(dragging);
+      }else{
+        grid.insertBefore(dragging, afterElement);
+      }
+    });
+
+    grid.addEventListener('dragleave', ()=>{
+      grid.classList.remove('drag-active');
+    });
+
+    grid.addEventListener('drop', ()=>{
+      grid.classList.remove('drag-active');
+      // 依目前 DOM 順序寫回 order
+      const ids = Array.from(grid.querySelectorAll('.card')).map(el=>el.dataset.id);
+      ids.forEach((id, i)=>{
+        const it = state.items.find(x=>x.id===id);
+        if(it) it.order = i;
+      });
+      scheduleSave();
+    });
+  }
+
+  function getDragAfterElement(container, y){
+    const elements = [...container.querySelectorAll('.card:not(.dragging)')];
+    let closest = {offset: Number.POSITIVE_INFINITY, element: null};
+    for(const child of elements){
+      const box = child.getBoundingClientRect();
+      const offset = y - box.top - box.height/2;
+      if(offset < 0 && Math.abs(offset) < closest.offset){
+        closest = {offset: Math.abs(offset), element: child};
+      }
+    }
+    return closest.element;
+  }
+
 
   function fmt(ts){
     const d = new Date(ts||Date.now());
@@ -579,11 +676,13 @@ input, button, select, textarea { font-size:16px !important; }
     grid.innerHTML = '';
     const items = sortItems([...state.items]);
     items.forEach((it)=> grid.appendChild(renderCard(it)) );
+    if(state.sort==='manual') enableGridDnd();
   }
 
   function renderCard(it){
     const card = document.createElement('div');
     card.className = 'card'; card.dataset.id = it.id;
+    card.setAttribute('draggable', state.sort==='manual');
 
     card.innerHTML = `
       <div class="banner">
@@ -676,7 +775,31 @@ el.slider.max = t;
           if(!isNaN(n) && n>0){
             it.no = n;
             it.updatedAt = now();
-            refresh();
+            
+    // === 長按 4 秒刪除卡片 ===
+    ;(function(){
+      let delTimer = null;
+      const startDel = () => {
+        delTimer = setTimeout(() => {
+          if(confirm('長按 4 秒：確定刪除這張卡片？')){
+            state.items = state.items.filter(x=>x.id!==it.id);
+            state.items.forEach((x,i)=> x.order=i);
+            scheduleSave();
+            card.remove();
+          }
+        }, 4000);
+      };
+      const cancelDel = () => { clearTimeout(delTimer); };
+
+      card.addEventListener('mousedown', startDel);
+      card.addEventListener('touchstart', startDel);
+      card.addEventListener('mouseup', cancelDel);
+      card.addEventListener('mouseleave', cancelDel);
+      card.addEventListener('touchend', cancelDel);
+      card.addEventListener('touchcancel', cancelDel);
+    })();
+
+    refresh();
             scheduleSave();
           } else {
             alert('請輸入正確的數字');
@@ -720,18 +843,90 @@ if(typeof it.no === 'number'){
     el.slider.addEventListener('input', e => {
       it.seen = parseInt(e.target.value||'0',10);
       it.updatedAt = now();
-      refresh(); scheduleSave();
+      
+    // === 長按 4 秒刪除卡片 ===
+    ;(function(){
+      let delTimer = null;
+      const startDel = () => {
+        delTimer = setTimeout(() => {
+          if(confirm('長按 4 秒：確定刪除這張卡片？')){
+            state.items = state.items.filter(x=>x.id!==it.id);
+            state.items.forEach((x,i)=> x.order=i);
+            scheduleSave();
+            card.remove();
+          }
+        }, 4000);
+      };
+      const cancelDel = () => { clearTimeout(delTimer); };
+
+      card.addEventListener('mousedown', startDel);
+      card.addEventListener('touchstart', startDel);
+      card.addEventListener('mouseup', cancelDel);
+      card.addEventListener('mouseleave', cancelDel);
+      card.addEventListener('touchend', cancelDel);
+      card.addEventListener('touchcancel', cancelDel);
+    })();
+
+    refresh(); scheduleSave();
     });
     el.minus.addEventListener('click', ()=>{
       it.total = Math.max(1, (it.total||1)-1);
       if(it.seen > it.total) it.seen = it.total;
       it.updatedAt = now();
-      refresh(); scheduleSave();
+      
+    // === 長按 4 秒刪除卡片 ===
+    ;(function(){
+      let delTimer = null;
+      const startDel = () => {
+        delTimer = setTimeout(() => {
+          if(confirm('長按 4 秒：確定刪除這張卡片？')){
+            state.items = state.items.filter(x=>x.id!==it.id);
+            state.items.forEach((x,i)=> x.order=i);
+            scheduleSave();
+            card.remove();
+          }
+        }, 4000);
+      };
+      const cancelDel = () => { clearTimeout(delTimer); };
+
+      card.addEventListener('mousedown', startDel);
+      card.addEventListener('touchstart', startDel);
+      card.addEventListener('mouseup', cancelDel);
+      card.addEventListener('mouseleave', cancelDel);
+      card.addEventListener('touchend', cancelDel);
+      card.addEventListener('touchcancel', cancelDel);
+    })();
+
+    refresh(); scheduleSave();
     });
     el.plus.addEventListener('click', ()=>{
       it.total = Math.min(9999, (it.total||1)+1);
       it.updatedAt = now();
-      refresh(); scheduleSave();
+      
+    // === 長按 4 秒刪除卡片 ===
+    ;(function(){
+      let delTimer = null;
+      const startDel = () => {
+        delTimer = setTimeout(() => {
+          if(confirm('長按 4 秒：確定刪除這張卡片？')){
+            state.items = state.items.filter(x=>x.id!==it.id);
+            state.items.forEach((x,i)=> x.order=i);
+            scheduleSave();
+            card.remove();
+          }
+        }, 4000);
+      };
+      const cancelDel = () => { clearTimeout(delTimer); };
+
+      card.addEventListener('mousedown', startDel);
+      card.addEventListener('touchstart', startDel);
+      card.addEventListener('mouseup', cancelDel);
+      card.addEventListener('mouseleave', cancelDel);
+      card.addEventListener('touchend', cancelDel);
+      card.addEventListener('touchcancel', cancelDel);
+    })();
+
+    refresh(); scheduleSave();
     });
 
     // editable title (click to edit)
@@ -779,13 +974,48 @@ if(typeof it.no === 'number'){
       if(!isNaN(n) && n>0){
         it.no = n;
         it.updatedAt = now();
-        refresh();
+        
+    // === 長按 4 秒刪除卡片 ===
+    ;(function(){
+      let delTimer = null;
+      const startDel = () => {
+        delTimer = setTimeout(() => {
+          if(confirm('長按 4 秒：確定刪除這張卡片？')){
+            state.items = state.items.filter(x=>x.id!==it.id);
+            state.items.forEach((x,i)=> x.order=i);
+            scheduleSave();
+            card.remove();
+          }
+        }, 4000);
+      };
+      const cancelDel = () => { clearTimeout(delTimer); };
+
+      card.addEventListener('mousedown', startDel);
+      card.addEventListener('touchstart', startDel);
+      card.addEventListener('mouseup', cancelDel);
+      card.addEventListener('mouseleave', cancelDel);
+      card.addEventListener('touchend', cancelDel);
+      card.addEventListener('touchcancel', cancelDel);
+    })();
+
+    refresh();
         scheduleSave();
       } else {
         alert('請輸入正確的數字');
       }
     });
 
+
+
+    // DnD: per-card
+    card.addEventListener('dragstart', (e)=>{
+      if(state.sort!=='manual'){ e.preventDefault(); return; }
+      card.classList.add('dragging');
+      try{ e.dataTransfer.setData('text/plain', it.id); }catch(_){}
+    });
+    card.addEventListener('dragend', ()=>{
+      card.classList.remove('dragging');
+    });
 
     // initial setup
     
@@ -796,7 +1026,31 @@ if(typeof it.no === 'number'){
         pressTimer = setTimeout(() => {
           it.seen = Math.max(0, Math.min(it.total||1, it.total||1)); // seen = total
           it.updatedAt = now();
-          refresh();
+          
+    // === 長按 4 秒刪除卡片 ===
+    ;(function(){
+      let delTimer = null;
+      const startDel = () => {
+        delTimer = setTimeout(() => {
+          if(confirm('長按 4 秒：確定刪除這張卡片？')){
+            state.items = state.items.filter(x=>x.id!==it.id);
+            state.items.forEach((x,i)=> x.order=i);
+            scheduleSave();
+            card.remove();
+          }
+        }, 4000);
+      };
+      const cancelDel = () => { clearTimeout(delTimer); };
+
+      card.addEventListener('mousedown', startDel);
+      card.addEventListener('touchstart', startDel);
+      card.addEventListener('mouseup', cancelDel);
+      card.addEventListener('mouseleave', cancelDel);
+      card.addEventListener('touchend', cancelDel);
+      card.addEventListener('touchcancel', cancelDel);
+    })();
+
+    refresh();
           scheduleSave();
           // 視覺提示
           card.classList.add('flash-ok');
@@ -812,6 +1066,30 @@ if(typeof it.no === 'number'){
       card.addEventListener('mouseleave', pressCancel);
       card.addEventListener('touchend', pressCancel);
       card.addEventListener('touchcancel', pressCancel);
+    })();
+
+    
+    // === 長按 4 秒刪除卡片 ===
+    ;(function(){
+      let delTimer = null;
+      const startDel = () => {
+        delTimer = setTimeout(() => {
+          if(confirm('長按 4 秒：確定刪除這張卡片？')){
+            state.items = state.items.filter(x=>x.id!==it.id);
+            state.items.forEach((x,i)=> x.order=i);
+            scheduleSave();
+            card.remove();
+          }
+        }, 4000);
+      };
+      const cancelDel = () => { clearTimeout(delTimer); };
+
+      card.addEventListener('mousedown', startDel);
+      card.addEventListener('touchstart', startDel);
+      card.addEventListener('mouseup', cancelDel);
+      card.addEventListener('mouseleave', cancelDel);
+      card.addEventListener('touchend', cancelDel);
+      card.addEventListener('touchcancel', cancelDel);
     })();
 
     refresh();
