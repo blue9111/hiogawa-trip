@@ -552,10 +552,13 @@ input, button, select, textarea { font-size:16px !important; }
       
   
       
-      /* 星形徽章清空內容 */
-      el.nochip.textContent = "";
+      
+      /* 強制清空星形徽章文字（不顯示番號或數字） */
+      
+/* 星形徽章清空內容 */
+      
 /* 移除徽章文字顯示 */
-      el.nochip.textContent = "";
+      
 /* 依百分比切換徽章顏色（<50 綠 / <80 藍 / 其餘金） */
   el.nochip.classList.remove("low", "mid", "high");
   if (p < 50) {
@@ -630,7 +633,7 @@ el.slider.max = t;
         }
       }
 if(typeof it.no === 'number'){
-        el.nochip.textContent = '#' + String(it.no).padStart(2,'0');
+        
         el.nochip.classList.remove('hidden');
       }else{
         el.nochip.classList.add('hidden');
